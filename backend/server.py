@@ -547,8 +547,13 @@ async def get_admin_user(request: Request):
             logger.warning(f"Invalid Admin Session ID: {session_id}")
             raise HTTPException(status_code=401, detail="Invalid admin session")
         
+        # Safe timezone handling
+        created_at = session["created_at"]
+        if created_at.tzinfo is None:
+            created_at = created_at.replace(tzinfo=timezone.utc)
+            
         # Check if session expired (24 hours)
-        if datetime.now(timezone.utc) - session["created_at"] > timedelta(hours=24):
+        if datetime.now(timezone.utc) - created_at > timedelta(hours=24):
             await db.admin_sessions.delete_one({"session_id": session_id})
             logger.warning(f"Expired Admin Session ID: {session_id}")
             raise HTTPException(status_code=401, detail="Session expired")
@@ -556,7 +561,7 @@ async def get_admin_user(request: Request):
         # Safe Conversion: Ensure this is a clean dict for FastAPI
         safe_session = {
             "session_id": session["session_id"],
-            "created_at": session["created_at"],
+            "created_at": created_at,
             "id": str(session["_id"]) if "_id" in session else None
         }
         return safe_session
