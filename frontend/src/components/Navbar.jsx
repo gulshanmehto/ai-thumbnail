@@ -14,7 +14,7 @@ export default function Navbar() {
           <div className="bg-primary/10 p-2 rounded-lg">
             <Sparkles className="w-5 h-5 text-primary" />
           </div>
-          <span className="font-bold text-xl tracking-tight">QuickThumb.ai</span>
+          <span className="font-bold text-xl tracking-tight">QuikThumb.ai</span>
         </Link>
 
         <div className="flex items-center gap-4">
