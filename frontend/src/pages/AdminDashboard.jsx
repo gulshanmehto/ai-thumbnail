@@ -12,7 +12,7 @@ import {
 import axios from 'axios';
 import { toast } from 'sonner';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://ai-thumbnail-50sc.onrender.com/api';
 
 // Stat Card Component
 const StatCard = ({ icon: Icon, label, value, subValue, color = "red" }) => (

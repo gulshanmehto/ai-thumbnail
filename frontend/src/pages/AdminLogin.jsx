@@ -7,7 +7,8 @@ import { Sparkles, Lock, Mail, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://ai-thumbnail-50sc.onrender.com/api';
+console.log("Admin Login using API:", API_URL);
 
 export default function AdminLogin() {
     const [email, setEmail] = useState('');
