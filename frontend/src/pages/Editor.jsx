@@ -79,7 +79,7 @@ export default function Editor() {
                 thumbnail_text: thumbnailText,
                 aspect_ratio: aspectRatio,
                 subject_image: subjectPreview,
-                reference_image: styleMode === 'upload' ? referencePreview : null,
+                reference_image: (styleMode === 'upload' && referencePreview) ? referencePreview : "",
                 // New Engine Fields
                 intent,
                 image_type: imageType,
