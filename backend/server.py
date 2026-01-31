@@ -62,7 +62,14 @@ app.mount("/api/static", StaticFiles(directory="static"), name="static")
 api_router = APIRouter(prefix="/api")
 
 # CORS
-origins = os.getenv("CORS_ORIGINS", "*").split(",")
+cors_origins_raw = os.getenv("CORS_ORIGINS", "")
+if cors_origins_raw and cors_origins_raw != "*":
+    origins = [o.strip() for o in cors_origins_raw.split(",") if o.strip()]
+else:
+    # Default for local development if not set, but warning for production
+    origins = ["http://localhost:3000"]
+    logger.warning("CORS_ORIGINS not set or set to *. Defaulting to http://localhost:3000 for safety.")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
