@@ -583,6 +583,10 @@ async def admin_login(req: AdminLoginRequest, response: Response):
         "session_id": session_id
     }
 
+@api_router.get("/admin/check")
+async def check_admin_session(admin: dict = Depends(get_admin_user)):
+    return {"status": "authenticated", "admin_id": admin["session_id"]}
+
 @api_router.post("/admin/logout")
 async def admin_logout(response: Response):
     response.delete_cookie("admin_session")
