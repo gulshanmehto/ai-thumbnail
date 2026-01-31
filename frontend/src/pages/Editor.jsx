@@ -75,6 +75,7 @@ export default function Editor() {
         setLoading(true);
         try {
             const payload = {
+                description: description || "", // Send empty string if undefined
                 thumbnail_text: thumbnailText,
                 aspect_ratio: aspectRatio,
                 subject_image: subjectPreview,
@@ -97,8 +98,21 @@ export default function Editor() {
             setUser(prev => ({ ...prev, credits: data.credits }));
             toast.success("Thumbnail generated successfully!");
         } catch (error) {
-            console.error(error);
-            toast.error(error.response?.data?.detail || "Generation failed");
+            console.error("Generation Error:", error);
+            // Safely parse error to avoid React #31 crash
+            let errorMsg = "Generation failed";
+            if (error.response?.data?.detail) {
+                const detail = error.response.data.detail;
+                if (typeof detail === 'string') {
+                    errorMsg = detail;
+                } else if (Array.isArray(detail)) {
+                    // Pydantic validation array
+                    errorMsg = detail.map(e => `${e.loc.join('.')}: ${e.msg}`).join(', ');
+                } else {
+                    errorMsg = JSON.stringify(detail);
+                }
+            }
+            toast.error(errorMsg);
         } finally {
             setLoading(false);
         }

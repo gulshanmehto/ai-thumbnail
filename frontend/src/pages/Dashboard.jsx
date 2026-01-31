@@ -33,6 +33,7 @@ export default function Dashboard() {
 
   const getImageUrl = (thumb) => {
     if (!thumb.image_url) return null;
+    if (thumb.image_url.startsWith('http')) return thumb.image_url;
     return `${BACKEND_URL}${thumb.image_url}`;
   };
 
