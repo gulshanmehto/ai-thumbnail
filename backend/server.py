@@ -39,7 +39,7 @@ def verify_password(password: str, stored_hash: str) -> bool:
 
 # Config
 MONGO_URL = os.getenv("MONGO_URL")
-DB_NAME = os.getenv("DB_NAME")
+DB_NAME = os.getenv("DB_NAME", "ai_thumb")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 STRIPE_KEY = os.getenv("STRIPE_SECRET_KEY")
 
