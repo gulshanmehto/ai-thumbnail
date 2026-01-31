@@ -57,12 +57,12 @@ export default function Navbar() {
           ) : (
             <>
               <Link to="/login">
-                <Button variant="outline" size="sm" className="text-[#111827] border-gray-300 hover:bg-gray-50 rounded-full px-5 font-medium">
+                <Button variant="outline" size="sm" className="text-[#111827] border-gray-300 hover:bg-gray-50 rounded-xl px-5 font-medium">
                   Login
                 </Button>
               </Link>
               <Link to="/signup">
-                <button className="h-9 px-5 text-sm font-semibold rounded-full bg-gradient-to-r from-[#FF4D4D] to-[#FF003C] text-white shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300">
+                <button className="h-9 px-5 text-sm font-semibold rounded-xl bg-gradient-to-r from-[#FF4D4D] to-[#FF003C] text-white shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300">
                   Start now
                 </button>
               </Link>

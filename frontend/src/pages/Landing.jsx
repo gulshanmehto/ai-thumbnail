@@ -44,18 +44,18 @@ export default function Landing() {
                         <div className="flex items-center justify-center mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
                             {user ? (
                                 <Link to="/dashboard">
-                                    <button className="group relative h-14 px-1 pr-1 pl-6 text-lg font-semibold rounded-full bg-gradient-to-r from-[#FF4D4D] to-[#FF003C] text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 flex items-center gap-3">
+                                    <button className="group relative h-14 px-1 pr-1 pl-6 text-lg font-semibold rounded-xl bg-gradient-to-r from-[#FF4D4D] to-[#FF003C] text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 flex items-center gap-3">
                                         <span>Go to Dashboard</span>
-                                        <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
+                                        <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium">
                                             <ArrowRight className="w-5 h-5" />
                                         </span>
                                     </button>
                                 </Link>
                             ) : (
                                 <Link to="/signup">
-                                    <button className="group relative h-14 px-1 pr-1 pl-6 text-lg font-semibold rounded-full bg-gradient-to-r from-[#FF4D4D] to-[#FF003C] text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 flex items-center gap-3">
+                                    <button className="group relative h-14 px-1 pr-1 pl-6 text-lg font-semibold rounded-xl bg-gradient-to-r from-[#FF4D4D] to-[#FF003C] text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 flex items-center gap-3">
                                         <span>Generate Thumbnails</span>
-                                        <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
+                                        <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium">
                                             Try it for free
                                         </span>
                                     </button>
