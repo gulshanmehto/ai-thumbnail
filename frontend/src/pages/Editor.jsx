@@ -75,7 +75,7 @@ export default function Editor() {
         setLoading(true);
         try {
             const payload = {
-                description: description || "", // Send empty string if undefined
+                description: intent, // Use intent as description since we removed the text field
                 thumbnail_text: thumbnailText,
                 aspect_ratio: aspectRatio,
                 subject_image: subjectPreview,
