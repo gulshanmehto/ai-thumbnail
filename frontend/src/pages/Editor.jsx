@@ -8,7 +8,6 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, Download, RefreshCw, Upload, Image as ImageIcon, Type, Sparkles, Wand2 } from 'lucide-react';
-import { Wand2 } from 'lucide-react';
 import { BACKEND_URL } from '../lib/config';
 
 export default function Editor() {
