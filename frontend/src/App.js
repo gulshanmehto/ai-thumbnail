@@ -11,6 +11,8 @@ import Navbar from './components/Navbar';
 import Pricing from './pages/Pricing';
 import Showcase from './pages/Showcase';
 import Affiliate from './pages/Affiliate';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -23,9 +25,12 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function AppContent() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-[#111111] font-sans antialiased">
-      <Navbar />
+    <div className={`min-h-screen ${isAdminRoute ? 'bg-[#111827]' : 'bg-[#FAFAFA]'} text-[#111111] font-sans antialiased`}>
+      {!isAdminRoute && <Navbar />}
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
@@ -43,6 +48,10 @@ function AppContent() {
             <Editor />
           </ProtectedRoute>
         } />
+        {/* Admin Routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
       </Routes>
       <Toaster />
     </div>
