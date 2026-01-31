@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 
 const AuthContext = createContext();
 
+import { BACKEND_URL } from '../lib/config';
+
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
@@ -16,7 +18,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const { data } = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/auth/me`, {
+      const { data } = await axios.get(`${BACKEND_URL}/api/auth/me`, {
         withCredentials: true
       });
       setUser(data);
@@ -43,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const { data } = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
+      const { data } = await axios.post(`${BACKEND_URL}/api/auth/login`, {
         email, password
       }, { withCredentials: true });
       setUser(data.user);
@@ -57,7 +59,7 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (email, password, name) => {
     try {
-      const { data } = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/signup`, {
+      const { data } = await axios.post(`${BACKEND_URL}/api/auth/signup`, {
         email, password, name
       }, { withCredentials: true });
       setUser(data.user);
@@ -71,7 +73,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true });
+      await axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true });
       setUser(null);
       window.location.href = '/';
     } catch (error) {

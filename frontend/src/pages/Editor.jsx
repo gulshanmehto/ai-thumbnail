@@ -9,6 +9,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, Download, RefreshCw, Upload, Image as ImageIcon, Type, Sparkles, Wand2 } from 'lucide-react';
 import { STYLE_PRESETS } from '../lib/presets';
+import { BACKEND_URL } from '../lib/config';
 
 export default function Editor() {
     const { user, setUser } = useAuth();
@@ -57,7 +58,7 @@ export default function Editor() {
             };
 
             const { data } = await axios.post(
-                `${process.env.REACT_APP_BACKEND_URL}/api/generate`,
+                `${BACKEND_URL}/api/generate`,
                 payload,
                 { withCredentials: true }
             );

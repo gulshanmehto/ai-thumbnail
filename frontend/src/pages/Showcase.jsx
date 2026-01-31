@@ -4,6 +4,7 @@ import { Sparkles, Download, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { BACKEND_URL } from '../lib/config';
 
 export default function Showcase() {
     const [thumbnails, setThumbnails] = useState([]);
@@ -12,7 +13,7 @@ export default function Showcase() {
     useEffect(() => {
         const fetchShowcase = async () => {
             try {
-                const { data } = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/showcase`);
+                const { data } = await axios.get(`${BACKEND_URL}/api/showcase`);
                 setThumbnails(data);
             } catch (error) {
                 console.error("Failed to fetch showcase", error);
@@ -27,7 +28,7 @@ export default function Showcase() {
     const getImageUrl = (thumb) => {
         if (!thumb.image_url) return null;
         if (thumb.image_url.startsWith('https://')) return thumb.image_url;
-        return `${process.env.REACT_APP_BACKEND_URL}${thumb.image_url}`;
+        return `${BACKEND_URL}${thumb.image_url}`;
     };
 
     const handleDownload = async (imageUrl, filename) => {

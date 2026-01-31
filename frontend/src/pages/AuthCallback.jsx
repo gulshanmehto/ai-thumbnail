@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { BACKEND_URL } from '../lib/config';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -22,11 +23,11 @@ export default function AuthCallback() {
 
     const processAuth = async () => {
       try {
-        const { data } = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/auth/session-data`, {
+        const { data } = await axios.get(`${BACKEND_URL}/api/auth/session-data`, {
           headers: { 'X-Session-ID': sessionId },
           withCredentials: true
         });
-        
+
         setUser(data.user);
         navigate('/dashboard');
       } catch (error) {

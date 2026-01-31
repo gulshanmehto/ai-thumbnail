@@ -4,6 +4,7 @@ import { Check, Zap, Crown, Rocket } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
+import { BACKEND_URL } from '../lib/config';
 
 export default function Pricing() {
     const { user, login } = useAuth();
@@ -16,7 +17,7 @@ export default function Pricing() {
 
         try {
             const { data } = await axios.post(
-                `${process.env.REACT_APP_BACKEND_URL}/api/create-checkout-session`,
+                `${BACKEND_URL}/api/create-checkout-session`,
                 { pack_id: packId },
                 { withCredentials: true }
             );
