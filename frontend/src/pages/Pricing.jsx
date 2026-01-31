@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../components/ui/button';
-import { Check, Zap, Crown, Rocket } from 'lucide-react';
+import { Check, Zap, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
@@ -8,6 +8,7 @@ import { BACKEND_URL } from '../lib/config';
 
 export default function Pricing() {
     const { user, login } = useAuth();
+    const [isAnnual, setIsAnnual] = React.useState(false);
 
     const handleSubscribe = async (packId) => {
         if (!user) {
@@ -23,7 +24,6 @@ export default function Pricing() {
             );
 
             if (data.payu_url) {
-                // Create hidden form for PayU
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = data.payu_url;
@@ -48,121 +48,284 @@ export default function Pricing() {
     };
 
     return (
-        <div className="py-20 px-4 max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold mb-4">Choose Your Fuel</h1>
-            <p className="text-muted-foreground mb-12">Flexible plans for every creator. Upgrade or cancel anytime.</p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-7xl mx-auto">
-                {/* Free Plan */}
-                <div className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Zap className="w-6 h-6 text-gray-500" />
+        <div className="min-h-screen bg-[#0A0A0A] text-white py-20 px-4">
+            <div className="max-w-7xl mx-auto">
+                {/* Header Section */}
+                <div className="text-center mb-16">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-bold mb-6 border border-primary/30">
+                        ✨ 365 days of UNLIMITED Nano Banana Pro for Annual Pro
                     </div>
-                    <h3 className="text-xl font-bold mb-1">FREE</h3>
-                    <p className="text-xs text-muted-foreground mb-4">Try Before You Pay</p>
-                    <div className="flex items-baseline justify-center gap-1 mb-2">
-                        <span className="text-3xl font-bold">₹0</span>
-                    </div>
-                    <div className="bg-secondary/50 rounded-full py-1 px-3 text-[10px] font-medium mb-6 inline-block self-center">
-                        3 Credits • 7 Days
-                    </div>
+                    <h1 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter italic uppercase">
+                        Choose Your <span className="text-primary italic">Fuel</span>
+                    </h1>
 
-                    <ul className="space-y-3 text-left mb-8 text-xs text-muted-foreground flex-1">
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /> 1 Subject + Ref Image</li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /> Description + Text Overlay</li>
-                        <li className="flex gap-2 text-destructive font-medium"><Check className="w-4 h-4 opacity-50 shrink-0" /> Watermark ON</li>
-                        <li className="flex gap-2 opacity-50"><Check className="w-4 h-4 shrink-0" /> Limited Aspect Ratios</li>
-                    </ul>
-
-                    <Button className="w-full rounded-full" variant="outline" onClick={() => window.location.href = '/signup'}>
-                        Get Free Credits
-                    </Button>
+                    {/* Toggle */}
+                    <div className="flex items-center justify-center gap-4 mb-12">
+                        <span className={`text-sm font-bold ${!isAnnual ? 'text-white' : 'text-muted-foreground'}`}>Monthly</span>
+                        <button
+                            onClick={() => setIsAnnual(!isAnnual)}
+                            className="w-14 h-7 bg-white/10 rounded-full p-1 relative transition-all duration-300 border border-white/20"
+                        >
+                            <div className={`w-5 h-5 bg-white rounded-full transition-all duration-300 ${isAnnual ? 'translate-x-7 bg-primary shadow-[0_0_10px_rgba(var(--primary),0.8)]' : 'translate-x-0'}`} />
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <span className={`text-sm font-bold ${isAnnual ? 'text-white' : 'text-muted-foreground'}`}>Annual</span>
+                            <span className="bg-[#FF007A] text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse uppercase tracking-widest whitespace-nowrap">
+                                52% OFF
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Starter Plan */}
-                <div className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col">
-                    <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Rocket className="w-6 h-6 text-blue-500" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-1">STARTER</h3>
-                    <p className="text-xs text-muted-foreground mb-4">For Serious Beginners</p>
-                    <div className="flex items-baseline justify-center gap-1 mb-2">
-                        <span className="text-3xl font-bold">₹999</span>
-                        <span className="text-sm text-muted-foreground">/mo</span>
-                    </div>
-                    <div className="bg-blue-50 text-blue-700 rounded-full py-1 px-3 text-[10px] font-medium mb-6 inline-block self-center">
-                        50 Credits • 30 Days
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6">
+                    {/* Basic / Free Plan */}
+                    <div className="bg-[#141414] border border-white/10 rounded-3xl p-6 flex flex-col hover:border-white/20 transition-all group overflow-hidden relative">
+                        <div className="mb-8">
+                            <h3 className="text-2xl font-black mb-1 italic uppercase leading-none tracking-tight">Free</h3>
+                            <p className="text-xs text-muted-foreground font-medium">For beginners first exploring AI creation</p>
+                        </div>
+
+                        <div className="mb-8 p-1">
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-4xl font-black italic tracking-tighter">₹0</span>
+                                <span className="text-xs font-bold text-muted-foreground">/mo</span>
+                            </div>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Billed as ₹0 once</p>
+                        </div>
+
+                        <Button
+                            className="w-full h-11 bg-white text-black hover:bg-white/90 rounded-xl font-black italic uppercase tracking-wider mb-4 transition-transform active:scale-95"
+                            onClick={() => window.location.href = '/signup'}
+                        >
+                            Select Plan
+                        </Button>
+
+                        <div className="flex items-center gap-2 py-2 px-3 bg-white/5 rounded-xl mb-8 border border-white/5">
+                            <Zap className="w-3 h-3 text-muted-foreground" />
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-[8px]">No difference compared to annual</span>
+                        </div>
+
+                        <div className="space-y-6 flex-1">
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 text-[11px] font-black text-primary uppercase tracking-widest bg-primary/5 p-2 rounded-lg border border-primary/10">
+                                    <Zap className="w-4 h-4" /> 3 Credits per month
+                                </div>
+
+                                <ul className="space-y-3">
+                                    <li className="flex items-center gap-3 text-xs font-bold">
+                                        <Check className="w-4 h-4 text-green-500 shrink-0" />
+                                        <span>Standard Generation</span>
+                                    </li>
+                                    <li className="flex items-center gap-3 text-xs font-bold opacity-40">
+                                        <span className="w-4 flex justify-center text-lg leading-none">×</span>
+                                        <span>Bulk Generation</span>
+                                    </li>
+                                    <li className="flex items-center gap-3 text-xs font-bold opacity-40">
+                                        <span className="w-4 flex justify-center text-lg leading-none">×</span>
+                                        <span className="text-destructive">Watermark ON</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
 
-                    <ul className="space-y-3 text-left mb-8 text-xs flex-1">
-                        <li className="flex gap-2 font-bold"><Check className="w-4 h-4 text-green-500 shrink-0" /> No Watermark</li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /> All Aspect Ratios</li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /> All Studio Features</li>
-                        <li className="flex gap-2 px-2 py-1 bg-blue-50 rounded text-blue-700 font-bold">₹20 / image</li>
-                    </ul>
+                    {/* Starter Plan */}
+                    <div className="bg-[#141414] border border-white/10 rounded-3xl p-6 flex flex-col hover:border-white/20 transition-all group relative">
+                        <div className="mb-8">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-2xl font-black mb-1 italic uppercase leading-none tracking-tight">Starter</h3>
+                                <div className="bg-[#00F0FF]/10 text-[#00F0FF] text-[8px] font-black px-2 py-0.5 rounded border border-[#00F0FF]/20 tracking-tighter uppercase">50 THUMBS</div>
+                            </div>
+                            <p className="text-xs text-muted-foreground font-medium">For enthusiasts creating occasionally</p>
+                        </div>
 
-                    <Button className="w-full rounded-full border-blue-200 hover:bg-blue-50" variant="outline" onClick={() => handleSubscribe('pack_starter')}>
-                        Get Starter
-                    </Button>
+                        <div className="mb-8 p-1">
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-xl font-bold text-muted-foreground line-through italic opacity-50">₹1,999</span>
+                                <span className="text-4xl font-black italic tracking-tighter">₹999</span>
+                                <span className="text-xs font-bold text-muted-foreground">/mo</span>
+                            </div>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Billed for {isAnnual ? '12 months' : '1 month'}</p>
+                        </div>
+
+                        <Button
+                            className="w-full h-11 bg-white text-black hover:bg-white/90 rounded-xl font-black italic uppercase tracking-wider mb-4 transition-transform active:scale-95"
+                            onClick={() => handleSubscribe('pack_starter')}
+                        >
+                            Select Plan
+                        </Button>
+
+                        <div className="flex items-center gap-2 py-2 px-3 bg-[#FF007A]/5 rounded-xl mb-8 border border-[#FF007A]/10">
+                            <Zap className="w-3 h-3 text-[#FF007A]" />
+                            <span className="text-[10px] font-bold text-[#FF007A] uppercase tracking-widest text-[8px]">Save ₹500 compared to monthly</span>
+                        </div>
+
+                        <div className="space-y-6 flex-1">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between py-2 px-3 bg-white/5 rounded-xl border border-white/10">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-primary" />
+                                        <span className="text-[11px] font-black uppercase tracking-widest">50 Credits per month</span>
+                                    </div>
+                                    <div className="bg-primary/20 text-primary text-[8px] font-black px-1.5 py-0.5 rounded border border-primary/20">HOT</div>
+                                </div>
+
+                                <ul className="space-y-3">
+                                    <li className="flex items-center gap-3 text-xs font-bold">
+                                        <Check className="w-4 h-4 text-green-500 shrink-0" />
+                                        <span>No Watermark</span>
+                                    </li>
+                                    <li className="flex items-center gap-3 text-xs font-bold">
+                                        <Check className="w-4 h-4 text-green-500 shrink-0" />
+                                        <span>All Aspect Ratios</span>
+                                    </li>
+                                    <li className="flex items-center gap-3 text-xs font-bold opacity-40">
+                                        <span className="w-4 flex justify-center text-lg leading-none">×</span>
+                                        <span>Priority Rendering</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Creator Plan (Popular) */}
+                    <div className="bg-[#141414] border-2 border-[#D4FF33] rounded-3xl p-6 flex flex-col scale-105 shadow-[0_0_50px_rgba(212,255,51,0.15)] z-10 transition-all group relative">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#D4FF33] text-black text-[10px] font-black px-4 py-1 rounded-full uppercase italic tracking-widest flex items-center gap-2">
+                            <Zap className="w-3 h-3 fill-black" /> MOST POPULAR
+                        </div>
+
+                        <div className="mb-8">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-2xl font-black mb-1 italic uppercase leading-none tracking-tight text-[#D4FF33]">Creator</h3>
+                                <div className="bg-[#FF007A] text-white text-[8px] font-black px-2 py-0.5 rounded tracking-tighter uppercase whitespace-nowrap">40% OFF</div>
+                            </div>
+                            <p className="text-xs text-muted-foreground font-medium">The smart choice for consistent pros</p>
+                        </div>
+
+                        <div className="mb-8 p-1">
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-2xl font-bold text-muted-foreground line-through italic opacity-50">₹3,499</span>
+                                <span className="text-4xl font-black italic tracking-tighter">₹2,499</span>
+                                <span className="text-xs font-bold text-muted-foreground">/mo</span>
+                            </div>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60 italic">Billed for {isAnnual ? '12 months' : '2 months'}</p>
+                        </div>
+
+                        <Button
+                            className="w-full h-11 bg-[#D4FF33] text-black hover:bg-[#D4FF33]/90 rounded-xl font-black italic uppercase tracking-wider mb-4 transition-transform active:scale-95 shadow-[0_0_20px_rgba(212,255,51,0.3)]"
+                            onClick={() => handleSubscribe('pack_creator')}
+                        >
+                            Select Plan
+                        </Button>
+
+                        <div className="flex items-center gap-2 py-2 px-3 bg-[#D4FF33]/10 rounded-xl mb-8 border border-[#D4FF33]/20">
+                            <Zap className="w-3 h-3 text-[#D4FF33]" />
+                            <span className="text-[10px] font-bold text-[#D4FF33] uppercase tracking-widest text-[8px]">Save ₹1000 compared to starter</span>
+                        </div>
+
+                        <div className="space-y-6 flex-1">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between py-2 px-3 bg-[#D4FF33]/5 rounded-xl border border-[#D4FF33]/10">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-[#D4FF33]" />
+                                        <span className="text-[11px] font-black uppercase tracking-widest">150 Credits per month</span>
+                                    </div>
+                                    <div className="bg-[#D4FF33] text-black text-[8px] font-black px-2 py-0.5 rounded">ULTIMATE</div>
+                                </div>
+
+                                <ul className="space-y-4">
+                                    <li className="flex items-center gap-3 text-xs font-bold">
+                                        <Check className="w-4 h-4 text-[#D4FF33] shrink-0" />
+                                        <span>Faster Processing</span>
+                                    </li>
+                                    <li className="flex items-center gap-3 text-xs font-bold">
+                                        <Check className="w-4 h-4 text-[#D4FF33] shrink-0" />
+                                        <span>Priority Rendering</span>
+                                    </li>
+                                    <li className="flex items-center justify-between text-xs font-bold">
+                                        <div className="flex items-center gap-3">
+                                            <Check className="w-4 h-4 text-[#D4FF33] shrink-0" />
+                                            <span>Bulk Gen Support</span>
+                                        </div>
+                                        <span className="bg-[#D4FF33]/10 text-[#D4FF33] text-[9px] px-2 py-0.5 rounded border border-[#D4FF33]/20">PRO</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Pro Plan (Best Value) */}
+                    <div className="bg-[#141414] border-2 border-[#FF007A] rounded-3xl p-6 flex flex-col hover:border-white/20 transition-all group relative mt-4 md:mt-0">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#FF007A] text-white text-[10px] font-black px-4 py-1 rounded-full uppercase italic tracking-widest flex items-center gap-2">
+                            <Zap className="w-3 h-3 fill-white" /> BEST VALUE
+                        </div>
+
+                        <div className="mb-8">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-2xl font-black mb-1 italic uppercase leading-none tracking-tight text-[#FF007A]">Pro</h3>
+                                <div className="bg-[#FF007A]/10 text-[#FF007A] text-[8px] font-black px-2 py-0.5 rounded border border-[#FF007A]/20 tracking-tighter uppercase whitespace-nowrap">52% OFF</div>
+                            </div>
+                            <p className="text-xs text-muted-foreground font-medium">For scaling production to the max</p>
+                        </div>
+
+                        <div className="mb-8 p-1">
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-2xl font-bold text-muted-foreground line-through italic opacity-50">₹8,999</span>
+                                <span className="text-4xl font-black italic tracking-tighter">₹4,999</span>
+                                <span className="text-xs font-bold text-muted-foreground">/mo</span>
+                            </div>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Billed for {isAnnual ? '12 months' : '3 months'}</p>
+                        </div>
+
+                        <Button
+                            className="w-full h-11 bg-gradient-to-r from-[#FF007A] to-[#FF00C7] text-white hover:opacity-90 rounded-xl font-black italic uppercase tracking-wider mb-4 transition-transform active:scale-95 shadow-[0_0_20px_rgba(255,0,122,0.3)] border-none"
+                            onClick={() => handleSubscribe('pack_pro')}
+                        >
+                            Select Plan
+                        </Button>
+
+                        <div className="flex items-center gap-2 py-2 px-3 bg-[#FF007A]/10 rounded-xl mb-8 border border-[#FF007A]/20">
+                            <Zap className="w-3 h-3 text-[#FF007A]" />
+                            <span className="text-[10px] font-bold text-[#FF007A] uppercase tracking-widest text-[8px]">Save ₹4,000 compared to monthly</span>
+                        </div>
+
+                        <div className="space-y-6 flex-1">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between py-2 px-3 bg-[#FF007A]/5 rounded-xl border border-[#FF007A]/10">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-[#FF007A]" />
+                                        <span className="text-[11px] font-black uppercase tracking-widest">400 Credits per month</span>
+                                    </div>
+                                    <div className="bg-[#FF007A]/10 text-[#FF007A] text-[9px] px-2 py-0.5 rounded border border-[#FF007A]/20 font-black tracking-tighter uppercase">90 DAYS VAL.</div>
+                                </div>
+
+                                <ul className="space-y-4">
+                                    <li className="flex items-center justify-between text-xs font-bold">
+                                        <div className="flex items-center gap-3">
+                                            <Check className="w-4 h-4 text-[#FF007A] shrink-0" />
+                                            <span>Max Daily Limit</span>
+                                        </div>
+                                        <span className="bg-[#FF007A]/10 text-[#FF007A] text-[9px] px-2 py-0.5 rounded">UNLIMITED</span>
+                                    </li>
+                                    <li className="flex items-center justify-between text-xs font-bold">
+                                        <div className="flex items-center gap-3">
+                                            <Check className="w-4 h-4 text-[#FF007A] shrink-0" />
+                                            <span>Early Access Styles</span>
+                                        </div>
+                                        <span className="bg-yellow-500 text-black text-[9px] px-2 py-0.5 rounded font-black">SPECIAL</span>
+                                    </li>
+                                    <li className="flex items-center gap-3 text-xs font-bold">
+                                        <Check className="w-4 h-4 text-[#FF007A] shrink-0" />
+                                        <span>Dedicated Support Channel</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Creator Plan */}
-                <div className="bg-white border-2 border-primary rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all relative overflow-hidden flex flex-col transform hover:-translate-y-1">
-                    <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
-                        BEST VALUE
-                    </div>
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Crown className="w-6 h-6 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-1">CREATOR</h3>
-                    <p className="text-xs text-muted-foreground mb-4">Most Popular</p>
-                    <div className="flex items-baseline justify-center gap-1 mb-2">
-                        <span className="text-3xl font-bold">₹2,499</span>
-                        <span className="text-sm text-muted-foreground">/mo</span>
-                    </div>
-                    <div className="bg-primary text-white rounded-full py-1 px-3 text-[10px] font-bold mb-6 inline-block self-center">
-                        150 Credits • 60 Days
-                    </div>
-
-                    <ul className="space-y-3 text-left mb-8 text-xs flex-1">
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> <strong>Everything in Starter</strong></li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Faster Processing</li>
-                        <li className="flex gap-2 font-bold text-primary"><Check className="w-4 h-4 shrink-0" /> Priority Rendering</li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Bulk Generation Support</li>
-                        <li className="flex gap-2 px-2 py-1 bg-primary/5 rounded text-primary font-bold mt-2">₹16.6 / image</li>
-                    </ul>
-
-                    <Button className="w-full rounded-full shadow-lg" onClick={() => handleSubscribe('pack_creator')}>
-                        Get Creator
-                    </Button>
-                </div>
-
-                {/* Pro / Agency Plan */}
-                <div className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col">
-                    <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Rocket className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-1">PRO / AGENCY</h3>
-                    <p className="text-xs text-muted-foreground mb-4">Scale Without Thinking</p>
-                    <div className="flex items-baseline justify-center gap-1 mb-2">
-                        <span className="text-3xl font-bold">₹4,999</span>
-                        <span className="text-sm text-muted-foreground">/mo</span>
-                    </div>
-                    <div className="bg-purple-50 text-purple-700 rounded-full py-1 px-3 text-[10px] font-medium mb-6 inline-block self-center">
-                        400 Credits • 90 Days
-                    </div>
-
-                    <ul className="space-y-3 text-left mb-8 text-xs flex-1">
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-purple-500 shrink-0" /> <strong>Everything in Creator</strong></li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-purple-500 shrink-0" /> Max Daily Limit Increased</li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-purple-500 shrink-0" /> Early Access Styles</li>
-                        <li className="flex gap-2 font-bold"><Check className="w-4 h-4 text-purple-500 shrink-0" /> Dedicated Support</li>
-                        <li className="flex gap-2 px-2 py-1 bg-purple-50 rounded text-purple-700 font-bold mt-2">₹12.5 / image</li>
-                    </ul>
-
-                    <Button className="w-full rounded-full border-purple-200 hover:bg-purple-50" variant="outline" onClick={() => handleSubscribe('pack_pro')}>
-                        Get Pro
-                    </Button>
+                <div className="mt-20 text-center text-muted-foreground/40 text-[10px] font-bold uppercase tracking-[0.2em] leading-relaxed">
+                    All transactions are secure and encrypted. <br /> Credits are added instantly after payment confirmation.
                 </div>
             </div>
         </div>
