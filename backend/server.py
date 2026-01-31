@@ -341,7 +341,7 @@ async def generate_thumbnail(req: GenerateRequest, request: Request, user: dict 
         elif req.aspect_ratio == "1:1":
             width, height = 1024, 1024
 
-        image_api_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&seed={uuid.uuid4().int % 1000000}&model=flux&nologo=true"
+        image_api_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&seed={uuid.uuid4().int % 1000000}&model=nanobanana-pro&nologo=true"
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             image_resp = await client.get(image_api_url)
