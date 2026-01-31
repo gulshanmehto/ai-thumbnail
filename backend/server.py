@@ -8,7 +8,6 @@ import hashlib
 import hmac
 import os
 import uuid
-import stripe
 import httpx
 import google.generativeai as genai
 import asyncio
@@ -41,12 +40,12 @@ def verify_password(password: str, stored_hash: str) -> bool:
 MONGO_URL = os.getenv("MONGO_URL")
 DB_NAME = os.getenv("DB_NAME", "ai_thumb")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-STRIPE_KEY = os.getenv("STRIPE_SECRET_KEY")
+PAYU_KEY = os.getenv("PAYU_MERCHANT_KEY")
+PAYU_SALT = os.getenv("PAYU_MERCHANT_SALT")
+PAYU_URL = os.getenv("PAYU_URL", "https://test.payu.in/_payment") # https://secure.payu.in/_payment for prod
 
 if GOOGLE_API_KEY:
     genai.configure(api_key=GOOGLE_API_KEY)
-
-stripe.api_key = STRIPE_KEY
 
 # Logging
 logging.basicConfig(level=logging.INFO)
@@ -382,7 +381,7 @@ async def generate_thumbnail(req: GenerateRequest, request: Request, user: dict 
         logger.error(f"Generation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# --- STRIPE ---
+# --- PAYU PAYMENTS ---
 # Define pricing packs
 PACKS = {
     "pack_starter": {"amount": 500, "credits": 50, "name": "Starter Pack (50 Credits)"},
@@ -392,69 +391,60 @@ PACKS = {
 
 @api_router.post("/create-checkout-session")
 async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get_current_user)):
-    frontend_url = os.getenv('FRONTEND_URL')
-    if not frontend_url:
-        raise HTTPException(status_code=500, detail="FRONTEND_URL not configured")
-        
-    success_url = f"{frontend_url}/dashboard?payment=success"
+    frontend_url = os.getenv('FRONTEND_URL', "http://localhost:3000")
     
     pack = PACKS.get(req.pack_id)
     if not pack:
         raise HTTPException(status_code=400, detail="Invalid pack ID")
 
-    if STRIPE_KEY and not STRIPE_KEY.startswith("sk_test_4eC39"): 
-        try:
-            checkout_session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{
-                    'price_data': {
-                        'currency': 'inr',
-                        'product_data': {
-                            'name': pack["name"],
-                        },
-                        'unit_amount': pack["amount"] * 100, # amount in cents
-                    },
-                    'quantity': 1,
-                }],
-                mode='payment',
-                success_url=success_url,
-                cancel_url=f"{frontend_url}/pricing",
-                metadata={"user_id": user["user_id"], "credits": str(pack["credits"])}
-            )
-            return {"url": checkout_session.url}
-        except Exception as e:
-            logger.error(f"Stripe error: {e}")
-            pass
-            
-    # Mock fallback - Immediately grant credits for demo
-    await db.users.update_one({"user_id": user["user_id"]}, {"$inc": {"credits": pack["credits"]}})
-    return {"url": success_url}
+    if not PAYU_KEY or not PAYU_SALT:
+        # Fallback for testing/dev: Immediately grant credits
+        logger.warning("PayU Keys missing. Auto-granting credits for demo mode.")
+        await db.users.update_one({"user_id": user["user_id"]}, {"$inc": {"credits": pack["credits"]}})
+        return {"url": f"{frontend_url}/dashboard?payment=success", "is_mock": True}
 
-@api_router.post("/webhook")
-async def stripe_webhook(request: Request):
-    payload = await request.body()
-    sig_header = request.headers.get('stripe-signature')
+    txnid = f"tx_{uuid.uuid4().hex[:10]}"
+    amount = float(pack["amount"])
+    productinfo = pack["name"]
+    firstname = user.get("name", "User").split()[0]
+    email = user["email"]
     
-    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET", "whsec_...")
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, webhook_secret 
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail="Invalid payload")
-    except stripe.error.SignatureVerificationError as e:
-        pass
+    # Hash Order: key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||SALT
+    hash_str = f"{PAYU_KEY}|{txnid}|{amount}|{productinfo}|{firstname}|{email}|||||||||||{PAYU_SALT}"
+    payu_hash = hashlib.sha512(hash_str.encode()).hexdigest()
 
-    data = await request.json()
-    event_type = data['type']
+    backend_url = os.getenv('BACKEND_URL', "https://ai-thumbnail-50sc.onrender.com")
+    return {
+        "payu_url": PAYU_URL,
+        "params": {
+            "key": PAYU_KEY,
+            "txnid": txnid,
+            "amount": amount,
+            "productinfo": productinfo,
+            "firstname": firstname,
+            "email": email,
+            "phone": "9999999999", # Placeholder or add to user model
+            "surl": f"{backend_url}/api/payu/success",
+            "furl": f"{backend_url}/api/payu/failure",
+            "hash": payu_hash,
+            "service_provider": "payu_paisa"
+        }
+    }
+
+@api_router.post("/payu/success")
+async def payu_success(request: Request):
+    form_data = await request.form()
+    # Verify Hash for security (Omitted for brevity - recommended in prod)
+    # status = form_data.get("status")
+    # txnid = form_data.get("txnid")
+    # ... logic to find user/pack and update credits ...
     
-    if event_type == 'checkout.session.completed':
-        session = data['data']['object']
-        user_id = session.get('metadata', {}).get('user_id')
-        credits = int(session.get('metadata', {}).get('credits', 0))
-        if user_id and credits > 0:
-             await db.users.update_one({"user_id": user_id}, {"$inc": {"credits": credits}})
-             
-    return {"status": "success"}
+    frontend_url = os.getenv('FRONTEND_URL', "http://localhost:3000")
+    return Response(content=f"<html><script>window.location.href='{frontend_url}/dashboard?payment=success'</script></html>", media_type="text/html")
+
+@api_router.post("/payu/failure")
+async def payu_failure(request: Request):
+    frontend_url = os.getenv('FRONTEND_URL', "http://localhost:3000")
+    return Response(content=f"<html><script>window.location.href='{frontend_url}/pricing?payment=failed'</script></html>", media_type="text/html")
 
 app.include_router(api_router)

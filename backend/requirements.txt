@@ -3,7 +3,6 @@ uvicorn
 motor
 pydantic[email]
 python-multipart
-stripe
 httpx
 google-generativeai
 python-dotenv
