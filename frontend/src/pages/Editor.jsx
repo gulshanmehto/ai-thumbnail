@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, Download, RefreshCw, Upload, Image as ImageIcon, Type, Sparkles, Wand2 } from 'lucide-react';
-import { STYLE_PRESETS } from '../lib/presets';
+import { Wand2 } from 'lucide-react';
 import { BACKEND_URL } from '../lib/config';
 
 export default function Editor() {
@@ -84,31 +84,6 @@ export default function Editor() {
                     </h2>
 
                     <div className="space-y-6">
-                        {/* Style Presets */}
-                        <div className="space-y-3">
-                            <Label className="flex items-center gap-2">
-                                <Wand2 className="w-4 h-4 text-primary" /> Choose a Style Preset
-                            </Label>
-                            <div className="grid grid-cols-4 gap-2">
-                                {STYLE_PRESETS.map((preset) => (
-                                    <button
-                                        key={preset.id}
-                                        className={`group relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${referencePreview === preset.image_url ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-primary/50'}`}
-                                        onClick={() => {
-                                            setReferencePreview(preset.image_url);
-                                            setReferenceImage(preset.image_url);
-                                        }}
-                                        title={preset.name}
-                                    >
-                                        <img src={preset.image_url} alt={preset.name} className="w-full h-full object-cover" />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <span className="text-[10px] text-white font-bold uppercase tracking-wider">{preset.name}</span>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
                         {/* Image Uploads */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
