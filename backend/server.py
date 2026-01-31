@@ -513,8 +513,12 @@ async def payu_failure(request: Request):
     return Response(content=f"<html><script>window.location.href='{frontend_url}/pricing?payment=failed'</script></html>", media_type="text/html")
 
 # --- ADMIN DASHBOARD APIs ---
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@quickthumb.me")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")  # Change in production!
+# Note: These are read at runtime now for easier updates
+def get_admin_credentials():
+    return (
+        os.getenv("ADMIN_EMAIL", "admin@quickthumb.me"),
+        os.getenv("ADMIN_PASSWORD", "admin123")
+    )
 
 class AdminLoginRequest(BaseModel):
     email: str
@@ -546,7 +550,12 @@ async def get_admin_user(request: Request):
 
 @api_router.post("/admin/login")
 async def admin_login(req: AdminLoginRequest, response: Response):
-    if req.email != ADMIN_EMAIL or req.password != ADMIN_PASSWORD:
+    admin_email, admin_password = get_admin_credentials()
+    logger.info(f"Admin login attempt for: {req.email}")
+    logger.info(f"Expected admin email: {admin_email}")
+    
+    if req.email.strip().lower() != admin_email.strip().lower() or req.password != admin_password:
+        logger.warning(f"Admin login failed for: {req.email}")
         raise HTTPException(status_code=401, detail="Invalid admin credentials")
     
     session_id = str(uuid.uuid4())
