@@ -62,7 +62,12 @@ api_router = APIRouter(prefix="/api")
 
 # CORS
 cors_origins_raw = os.getenv("CORS_ORIGINS", "")
-origins = ["http://localhost:3000", "https://ai-thumbnail-phi.vercel.app"] # Base fallbacks
+origins = [
+    "http://localhost:3000", 
+    "https://ai-thumbnail-phi.vercel.app",
+    "https://www.quickthumb.me",
+    "https://quickthumb.me"
+] # Base fallbacks
 
 if cors_origins_raw and cors_origins_raw != "*":
     extra_origins = [o.strip().rstrip("/") for o in cors_origins_raw.split(",") if o.strip()]
