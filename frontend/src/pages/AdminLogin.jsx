@@ -23,10 +23,14 @@ export default function AdminLogin() {
         setError('');
 
         try {
-            await axios.post(`${API_URL}/admin/login`, {
+            const response = await axios.post(`${API_URL}/admin/login`, {
                 email,
                 password
             }, { withCredentials: true });
+
+            if (response.data.session_id) {
+                localStorage.setItem('admin_session', response.data.session_id);
+            }
 
             toast.success('Login successful!');
             navigate('/admin/dashboard');

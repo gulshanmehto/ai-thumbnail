@@ -51,55 +51,70 @@ export default function AdminDashboard() {
 
     const navigate = useNavigate();
 
+    const getAuthHeaders = useCallback(() => ({
+        'X-Admin-Token': localStorage.getItem('admin_session')
+    }), []);
+
     const loadStats = useCallback(async () => {
         try {
-            const res = await axios.get(`${API_URL}/admin/stats`, { withCredentials: true });
+            const res = await axios.get(`${API_URL}/admin/stats`, {
+                withCredentials: true,
+                headers: getAuthHeaders()
+            });
             setStats(res.data);
         } catch (err) {
             console.error('Failed to load stats:', err);
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [getAuthHeaders]);
 
     const loadDiscounts = useCallback(async () => {
         try {
-            const res = await axios.get(`${API_URL}/admin/discounts`, { withCredentials: true });
+            const res = await axios.get(`${API_URL}/admin/discounts`, {
+                withCredentials: true,
+                headers: getAuthHeaders()
+            });
             setDiscounts(res.data);
         } catch (err) {
             console.error('Failed to load discounts:', err);
         }
-    }, []);
+    }, [getAuthHeaders]);
 
     const loadUsers = useCallback(async (page = 1, search = '') => {
         try {
             const res = await axios.get(`${API_URL}/admin/users`, {
                 params: { page, limit: 15, search: search || undefined },
-                withCredentials: true
+                withCredentials: true,
+                headers: getAuthHeaders()
             });
             setUsers(res.data);
         } catch (err) {
             console.error('Failed to load users:', err);
         }
-    }, []);
+    }, [getAuthHeaders]);
 
     const loadTransactions = useCallback(async (page = 1) => {
         try {
             const res = await axios.get(`${API_URL}/admin/transactions`, {
                 params: { page, limit: 15 },
-                withCredentials: true
+                withCredentials: true,
+                headers: getAuthHeaders()
             });
             setTransactions(res.data);
         } catch (err) {
             console.error('Failed to load transactions:', err);
         }
-    }, []);
+    }, [getAuthHeaders]);
 
     // Check auth and load data
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                await axios.get(`${API_URL}/admin/check`, { withCredentials: true });
+                await axios.get(`${API_URL}/admin/check`, {
+                    withCredentials: true,
+                    headers: getAuthHeaders()
+                });
                 loadStats();
                 loadDiscounts();
             } catch (err) {
@@ -107,7 +122,7 @@ export default function AdminDashboard() {
             }
         };
         checkAuth();
-    }, [navigate, loadStats, loadDiscounts]);
+    }, [navigate, loadStats, loadDiscounts, getAuthHeaders]);
 
     useEffect(() => {
         if (activeTab === 'users') {
@@ -120,7 +135,11 @@ export default function AdminDashboard() {
 
 
     const handleLogout = async () => {
-        await axios.post(`${API_URL}/admin/logout`, {}, { withCredentials: true });
+        await axios.post(`${API_URL}/admin/logout`, {}, {
+            withCredentials: true,
+            headers: getAuthHeaders()
+        });
+        localStorage.removeItem('admin_session');
         navigate('/admin/login');
     };
 
@@ -138,7 +157,10 @@ export default function AdminDashboard() {
                 discount_percent: parseInt(newDiscount.discount_percent),
                 max_uses: newDiscount.max_uses ? parseInt(newDiscount.max_uses) : null,
                 description: newDiscount.description || null
-            }, { withCredentials: true });
+            }, {
+                withCredentials: true,
+                headers: getAuthHeaders()
+            });
             toast.success('Discount code created!');
             setNewDiscount({ code: '', discount_percent: 10, max_uses: '', description: '' });
             loadDiscounts();
@@ -150,7 +172,10 @@ export default function AdminDashboard() {
     const deleteDiscount = async (code) => {
         if (!window.confirm(`Delete discount code ${code}?`)) return;
         try {
-            await axios.delete(`${API_URL}/admin/discounts/${code}`, { withCredentials: true });
+            await axios.delete(`${API_URL}/admin/discounts/${code}`, {
+                withCredentials: true,
+                headers: getAuthHeaders()
+            });
             toast.success('Discount deleted');
             loadDiscounts();
         } catch (err) {
@@ -160,7 +185,10 @@ export default function AdminDashboard() {
 
     const toggleDiscount = async (code) => {
         try {
-            await axios.patch(`${API_URL}/admin/discounts/${code}/toggle`, {}, { withCredentials: true });
+            await axios.patch(`${API_URL}/admin/discounts/${code}/toggle`, {}, {
+                withCredentials: true,
+                headers: getAuthHeaders()
+            });
             loadDiscounts();
         } catch (err) {
             toast.error('Failed to toggle discount');

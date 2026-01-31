@@ -535,6 +535,10 @@ async def get_admin_user(request: Request):
     """Verify admin session"""
     session_id = request.cookies.get("admin_session")
     if not session_id:
+        # Fallback to header for cross-domain usage
+        session_id = request.headers.get("X-Admin-Token")
+        
+    if not session_id:
         raise HTTPException(status_code=401, detail="Admin authentication required")
     
     session = await db.admin_sessions.find_one({"session_id": session_id})
@@ -573,7 +577,11 @@ async def admin_login(req: AdminLoginRequest, response: Response):
         max_age=86400  # 24 hours
     )
     
-    return {"success": True, "message": "Admin logged in successfully"}
+    return {
+        "success": True, 
+        "message": "Admin logged in successfully",
+        "session_id": session_id
+    }
 
 @api_router.post("/admin/logout")
 async def admin_logout(response: Response):
