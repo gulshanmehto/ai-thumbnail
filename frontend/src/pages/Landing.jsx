@@ -3,6 +3,7 @@ import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Zap, CheckCircle2, Star, TrendingUp, Sparkles, MousePointerClick } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ThumbnailCarousel from '../components/ThumbnailCarousel';
 
 export default function Landing() {
     const { user } = useAuth();
@@ -70,6 +71,9 @@ export default function Landing() {
                         </div>
                     </div>
                 </section>
+
+                {/* Thumbnail Carousel */}
+                <ThumbnailCarousel />
 
                 {/* Stats Section */}
                 <section className="py-16 border-y border-gray-200 bg-white">
