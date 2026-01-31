@@ -175,7 +175,7 @@ async def signup(req: SignupRequest, response: Response):
         "name": req.name,
         "password_hash": hashed_password,
         "picture": f"https://api.dicebear.com/7.x/avataaars/svg?seed={req.name}",
-        "credits": 5,
+        "credits": 3,
         "created_at": datetime.now(timezone.utc)
     }
     await db.users.insert_one(new_user)
@@ -384,9 +384,9 @@ async def generate_thumbnail(req: GenerateRequest, request: Request, user: dict 
 # --- PAYU PAYMENTS ---
 # Define pricing packs
 PACKS = {
-    "pack_starter": {"amount": 500, "credits": 50, "name": "Starter Pack (50 Credits)"},
-    "pack_pro": {"amount": 2500, "credits": 300, "name": "Pro Pack (300 Credits)"},
-    "pack_agency": {"amount": 5000, "credits": 700, "name": "Agency Pack (700 Credits)"}
+    "pack_starter": {"amount": 999, "credits": 50, "name": "Starter Plan (50 Credits)"},
+    "pack_creator": {"amount": 2499, "credits": 150, "name": "Creator Plan (150 Credits)"},
+    "pack_pro": {"amount": 4999, "credits": 400, "name": "Pro/Agency Plan (400 Credits)"}
 }
 
 @api_router.post("/create-checkout-session")

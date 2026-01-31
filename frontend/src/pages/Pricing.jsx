@@ -50,80 +50,118 @@ export default function Pricing() {
     return (
         <div className="py-20 px-4 max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold mb-4">Choose Your Fuel</h1>
-            <p className="text-muted-foreground mb-12">One-time payments. No recurring fees. Credits never expire.</p>
+            <p className="text-muted-foreground mb-12">Flexible plans for every creator. Upgrade or cancel anytime.</p>
 
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                {/* Starter */}
-                <div className="bg-white border rounded-2xl p-8 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-7xl mx-auto">
+                {/* Free Plan */}
+                <div className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col">
                     <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Zap className="w-6 h-6 text-gray-600" />
+                        <Zap className="w-6 h-6 text-gray-500" />
                     </div>
-                    <h3 className="text-xl font-bold mb-2">Starter</h3>
-                    <div className="flex items-baseline justify-center gap-1 my-4">
-                        <span className="text-3xl font-bold">₹500</span>
+                    <h3 className="text-xl font-bold mb-1">FREE</h3>
+                    <p className="text-xs text-muted-foreground mb-4">Try Before You Pay</p>
+                    <div className="flex items-baseline justify-center gap-1 mb-2">
+                        <span className="text-3xl font-bold">₹0</span>
                     </div>
-                    <div className="bg-secondary/50 rounded-full py-1 px-3 text-sm font-medium mb-6 inline-block">
-                        50 Credits
+                    <div className="bg-secondary/50 rounded-full py-1 px-3 text-[10px] font-medium mb-6 inline-block self-center">
+                        3 Credits • 7 Days
                     </div>
 
-                    <ul className="space-y-3 text-left mb-8 text-sm text-muted-foreground">
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500" /> Standard Generation</li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500" /> Commercial Usage</li>
+                    <ul className="space-y-3 text-left mb-8 text-xs text-muted-foreground flex-1">
+                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /> 1 Subject + Ref Image</li>
+                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /> Description + Text Overlay</li>
+                        <li className="flex gap-2 text-destructive font-medium"><Check className="w-4 h-4 opacity-50 shrink-0" /> Watermark ON</li>
+                        <li className="flex gap-2 opacity-50"><Check className="w-4 h-4 shrink-0" /> Limited Aspect Ratios</li>
                     </ul>
 
-                    <Button className="w-full rounded-full" variant="outline" onClick={() => handleSubscribe('pack_starter')}>
-                        Get Started
+                    <Button className="w-full rounded-full" variant="outline" onClick={() => window.location.href = '/signup'}>
+                        Get Free Credits
                     </Button>
                 </div>
 
-                {/* Pro */}
-                <div className="bg-white border-2 border-primary/20 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all relative overflow-hidden transform hover:-translate-y-1">
-                    <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                        POPULAR
+                {/* Starter Plan */}
+                <div className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col">
+                    <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Rocket className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-1">STARTER</h3>
+                    <p className="text-xs text-muted-foreground mb-4">For Serious Beginners</p>
+                    <div className="flex items-baseline justify-center gap-1 mb-2">
+                        <span className="text-3xl font-bold">₹999</span>
+                        <span className="text-sm text-muted-foreground">/mo</span>
+                    </div>
+                    <div className="bg-blue-50 text-blue-700 rounded-full py-1 px-3 text-[10px] font-medium mb-6 inline-block self-center">
+                        50 Credits • 30 Days
+                    </div>
+
+                    <ul className="space-y-3 text-left mb-8 text-xs flex-1">
+                        <li className="flex gap-2 font-bold"><Check className="w-4 h-4 text-green-500 shrink-0" /> No Watermark</li>
+                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /> All Aspect Ratios</li>
+                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500 shrink-0" /> All Studio Features</li>
+                        <li className="flex gap-2 px-2 py-1 bg-blue-50 rounded text-blue-700 font-bold">₹20 / image</li>
+                    </ul>
+
+                    <Button className="w-full rounded-full border-blue-200 hover:bg-blue-50" variant="outline" onClick={() => handleSubscribe('pack_starter')}>
+                        Get Starter
+                    </Button>
+                </div>
+
+                {/* Creator Plan */}
+                <div className="bg-white border-2 border-primary rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all relative overflow-hidden flex flex-col transform hover:-translate-y-1">
+                    <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
+                        BEST VALUE
                     </div>
                     <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Crown className="w-6 h-6 text-primary" />
                     </div>
-                    <h3 className="text-xl font-bold mb-2">Pro</h3>
-                    <div className="flex items-baseline justify-center gap-1 my-4">
-                        <span className="text-4xl font-bold">₹2,500</span>
+                    <h3 className="text-xl font-bold mb-1">CREATOR</h3>
+                    <p className="text-xs text-muted-foreground mb-4">Most Popular</p>
+                    <div className="flex items-baseline justify-center gap-1 mb-2">
+                        <span className="text-3xl font-bold">₹2,499</span>
+                        <span className="text-sm text-muted-foreground">/mo</span>
                     </div>
-                    <div className="bg-primary/10 text-primary rounded-full py-1 px-3 text-sm font-bold mb-6 inline-block">
-                        300 Credits
+                    <div className="bg-primary text-white rounded-full py-1 px-3 text-[10px] font-bold mb-6 inline-block self-center">
+                        150 Credits • 60 Days
                     </div>
 
-                    <ul className="space-y-3 text-left mb-8 text-sm">
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-primary" /> <strong>Best Value</strong> per credit</li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-primary" /> Priority Generation</li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-primary" /> Early Access to features</li>
+                    <ul className="space-y-3 text-left mb-8 text-xs flex-1">
+                        <li className="flex gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> <strong>Everything in Starter</strong></li>
+                        <li className="flex gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Faster Processing</li>
+                        <li className="flex gap-2 font-bold text-primary"><Check className="w-4 h-4 shrink-0" /> Priority Rendering</li>
+                        <li className="flex gap-2"><Check className="w-4 h-4 text-primary shrink-0" /> Bulk Generation Support</li>
+                        <li className="flex gap-2 px-2 py-1 bg-primary/5 rounded text-primary font-bold mt-2">₹16.6 / image</li>
                     </ul>
 
-                    <Button className="w-full rounded-full" onClick={() => handleSubscribe('pack_pro')}>
-                        Get Pro
+                    <Button className="w-full rounded-full shadow-lg" onClick={() => handleSubscribe('pack_creator')}>
+                        Get Creator
                     </Button>
                 </div>
 
-                {/* Agency */}
-                <div className="bg-white border rounded-2xl p-8 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
-                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                {/* Pro / Agency Plan */}
+                <div className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col">
+                    <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Rocket className="w-6 h-6 text-purple-600" />
                     </div>
-                    <h3 className="text-xl font-bold mb-2">Agency</h3>
-                    <div className="flex items-baseline justify-center gap-1 my-4">
-                        <span className="text-3xl font-bold">₹5,000</span>
+                    <h3 className="text-xl font-bold mb-1">PRO / AGENCY</h3>
+                    <p className="text-xs text-muted-foreground mb-4">Scale Without Thinking</p>
+                    <div className="flex items-baseline justify-center gap-1 mb-2">
+                        <span className="text-3xl font-bold">₹4,999</span>
+                        <span className="text-sm text-muted-foreground">/mo</span>
                     </div>
-                    <div className="bg-purple-100 text-purple-700 rounded-full py-1 px-3 text-sm font-medium mb-6 inline-block">
-                        700 Credits
+                    <div className="bg-purple-50 text-purple-700 rounded-full py-1 px-3 text-[10px] font-medium mb-6 inline-block self-center">
+                        400 Credits • 90 Days
                     </div>
 
-                    <ul className="space-y-3 text-left mb-8 text-sm text-muted-foreground">
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500" /> Massive Volume</li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500" /> Bulk Download</li>
-                        <li className="flex gap-2"><Check className="w-4 h-4 text-green-500" /> Priority Support</li>
+                    <ul className="space-y-3 text-left mb-8 text-xs flex-1">
+                        <li className="flex gap-2"><Check className="w-4 h-4 text-purple-500 shrink-0" /> <strong>Everything in Creator</strong></li>
+                        <li className="flex gap-2"><Check className="w-4 h-4 text-purple-500 shrink-0" /> Max Daily Limit Increased</li>
+                        <li className="flex gap-2"><Check className="w-4 h-4 text-purple-500 shrink-0" /> Early Access Styles</li>
+                        <li className="flex gap-2 font-bold"><Check className="w-4 h-4 text-purple-500 shrink-0" /> Dedicated Support</li>
+                        <li className="flex gap-2 px-2 py-1 bg-purple-50 rounded text-purple-700 font-bold mt-2">₹12.5 / image</li>
                     </ul>
 
-                    <Button className="w-full rounded-full" variant="outline" onClick={() => handleSubscribe('pack_agency')}>
-                        Get Agency
+                    <Button className="w-full rounded-full border-purple-200 hover:bg-purple-50" variant="outline" onClick={() => handleSubscribe('pack_pro')}>
+                        Get Pro
                     </Button>
                 </div>
             </div>
