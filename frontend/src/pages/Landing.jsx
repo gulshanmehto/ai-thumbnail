@@ -9,45 +9,56 @@ export default function Landing() {
     const { user } = useAuth();
 
     return (
-        <div className="flex flex-col min-h-screen bg-[#F9FAFB]">
+        <div className="flex flex-col min-h-screen bg-[#FAFAFA]">
             <main className="flex-1">
                 {/* Hero Section */}
-                <section className="relative py-20 lg:py-32 px-4 overflow-hidden">
-                    {/* Background gradient blobs */}
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-red-200/30 to-pink-200/30 rounded-full blur-3xl -z-10" />
-                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-orange-200/20 to-red-200/20 rounded-full blur-3xl -z-10" />
-
-                    <div className="max-w-5xl mx-auto text-center">
-                        {/* Badge */}
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 shadow-sm text-sm font-semibold mb-8 animate-fade-in">
-                            <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-gray-700">The #1 AI Thumbnail Generator</span>
-                        </div>
-
+                <section className="relative py-8 lg:py-16 px-4 overflow-hidden">
+                    <div className="max-w-4xl mx-auto text-center">
                         {/* Main Headline */}
-                        <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-[#111827] mb-6 leading-[1.1] tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                            Stop losing views to{' '}
-                            <span className="text-gradient">mediocre thumbnails</span>
+                        <h1
+                            className="text-[32px] sm:text-[40px] lg:text-[48px] text-black mb-5 animate-fade-in"
+                            style={{
+                                fontWeight: 600,
+                                lineHeight: '55px',
+                                fontFamily: "'Open Sauce Two', Arial, sans-serif"
+                            }}
+                        >
+                            Create viral thumbnails<br />
+                            instantly that boost your views
                         </h1>
 
                         {/* Subheadline */}
-                        <p className="text-lg sm:text-xl text-[#4B5563] max-w-2xl mx-auto mb-10 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                            Generate studio-quality thumbnails that stop scrolling and drive clicks. Trained on 50,000+ viral thumbnails. No design skills needed.
+                        <p
+                            className="text-[16px] sm:text-[17px] text-[#6B7280] max-w-xl mx-auto mb-8 animate-fade-in"
+                            style={{
+                                fontWeight: 400,
+                                lineHeight: '26px',
+                                fontFamily: "'Open Sauce Two', Arial, sans-serif",
+                                animationDelay: '0.1s'
+                            }}
+                        >
+                            Generate studio-quality YouTube & Shorts thumbnails that stop scrolling and drive clicks in seconds. No design skills needed.
                         </p>
 
-                        {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                        {/* CTA Button */}
+                        <div className="flex items-center justify-center mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
                             {user ? (
                                 <Link to="/dashboard">
-                                    <Button size="lg" className="h-14 px-8 text-lg rounded-full btn-gradient border-0 text-white shadow-xl">
-                                        Go to Dashboard <ArrowRight className="ml-2 w-5 h-5" />
-                                    </Button>
+                                    <button className="group relative h-14 px-1 pr-1 pl-6 text-lg font-semibold rounded-full bg-gradient-to-r from-[#FF4D4D] to-[#FF003C] text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 flex items-center gap-3">
+                                        <span>Go to Dashboard</span>
+                                        <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
+                                            <ArrowRight className="w-5 h-5" />
+                                        </span>
+                                    </button>
                                 </Link>
                             ) : (
                                 <Link to="/signup">
-                                    <Button size="lg" className="h-14 px-8 text-lg rounded-full btn-gradient border-0 text-white shadow-xl">
-                                        Generate Thumbnails — It's Free <ArrowRight className="ml-2 w-5 h-5" />
-                                    </Button>
+                                    <button className="group relative h-14 px-1 pr-1 pl-6 text-lg font-semibold rounded-full bg-gradient-to-r from-[#FF4D4D] to-[#FF003C] text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 flex items-center gap-3">
+                                        <span>Generate Thumbnails</span>
+                                        <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
+                                            Try it for free
+                                        </span>
+                                    </button>
                                 </Link>
                             )}
                         </div>
