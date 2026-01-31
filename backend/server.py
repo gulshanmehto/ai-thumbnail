@@ -409,10 +409,11 @@ async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get
     productinfo = pack["name"]
     firstname = user.get("name", "User").split()[0]
     email = user["email"]
+    udf1 = user["user_id"]
+    udf2 = req.pack_id
     
-    # Hash Order: key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5|udf6|udf7|udf8|udf9|udf10|SALT
-    # This requires 16 pipes in total.
-    hash_str = f"{PAYU_KEY}|{txnid}|{amount_str}|{productinfo}|{firstname}|{email}|||||||||||{PAYU_SALT}"
+    # Hash Order: key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||SALT
+    hash_str = f"{PAYU_KEY}|{txnid}|{amount_str}|{productinfo}|{firstname}|{email}|{udf1}|{udf2}|||||||||||{PAYU_SALT}"
     payu_hash = hashlib.sha512(hash_str.encode()).hexdigest()
 
     backend_url = os.getenv('BACKEND_URL', "https://ai-thumbnail-50sc.onrender.com")
@@ -425,11 +426,16 @@ async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get
             "productinfo": productinfo,
             "firstname": firstname,
             "email": email,
-            "phone": "9999999999", # Placeholder or add to user model
+            "phone": "9999999999",
             "surl": f"{backend_url}/api/payu/success",
             "furl": f"{backend_url}/api/payu/failure",
             "hash": payu_hash,
-            "service_provider": "payu_paisa"
+            "service_provider": "payu_paisa",
+            "udf1": user["user_id"],
+            "udf2": req.pack_id,
+            "udf3": "",
+            "udf4": "",
+            "udf5": ""
         }
     }
 
