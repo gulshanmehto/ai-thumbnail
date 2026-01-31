@@ -73,9 +73,9 @@ export default function Editor() {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8 grid lg:grid-cols-[450px_1fr] gap-8 h-full min-h-[calc(100vh-6rem)]">
+        <div className="max-w-7xl mx-auto px-4 py-6 md:py-8 grid grid-cols-1 lg:grid-cols-[450px_1fr] gap-8">
             {/* Sidebar Controls */}
-            <div className="bg-white border rounded-xl p-6 h-fit space-y-6 shadow-sm overflow-y-auto max-h-[calc(100vh-2rem)]">
+            <div className="bg-white border rounded-xl p-6 h-fit space-y-6 shadow-sm">
                 <div>
                     <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-primary" />
@@ -109,11 +109,11 @@ export default function Editor() {
                         </div>
 
                         {/* Image Uploads */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>1. Subject Image</Label>
                                 <div
-                                    className="border-2 border-dashed rounded-lg p-4 h-32 flex flex-col items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors relative overflow-hidden"
+                                    className="border-2 border-dashed rounded-lg p-4 h-28 sm:h-32 flex flex-col items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors relative overflow-hidden"
                                     onClick={() => document.getElementById('subject-upload').click()}
                                 >
                                     {subjectPreview ? (
@@ -137,7 +137,7 @@ export default function Editor() {
                             <div className="space-y-2">
                                 <Label>2. Style Reference</Label>
                                 <div
-                                    className="border-2 border-dashed rounded-lg p-4 h-32 flex flex-col items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors relative overflow-hidden"
+                                    className="border-2 border-dashed rounded-lg p-4 h-28 sm:h-32 flex flex-col items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors relative overflow-hidden"
                                     onClick={() => document.getElementById('ref-upload').click()}
                                 >
                                     {referencePreview ? (
@@ -214,7 +214,7 @@ export default function Editor() {
             </div>
 
             {/* Canvas / Preview */}
-            <div className="bg-[#E5E5E5] rounded-xl border flex items-center justify-center relative overflow-hidden group shadow-inner min-h-[400px]">
+            <div className="bg-[#E5E5E5] rounded-xl border flex items-center justify-center relative overflow-hidden group shadow-inner min-h-[300px] sm:min-h-[400px]">
                 {!generatedImage ? (
                     <div className="text-center p-8 max-w-md">
                         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
