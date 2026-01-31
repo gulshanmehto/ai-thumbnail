@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthContext';
-import { ArrowRight, Zap, Star, TrendingUp, Sparkles, MousePointerClick } from 'lucide-react';
+import { ArrowRight, Zap, Star, TrendingUp, Sparkles, MousePointerClick, Youtube, Building2, Image, Film, Video, Users, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ThumbnailCarousel from '../components/ThumbnailCarousel';
 
@@ -139,32 +139,82 @@ export default function Landing() {
                 {/* Thumbnail Carousel */}
                 <ThumbnailCarousel />
 
-                {/* Stats Section */}
-                <section className="py-16 border-y border-gray-200 bg-white">
-                    <div className="max-w-6xl mx-auto px-4">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                {/* USE CASES - Made for real creators */}
+                <section className="py-16 lg:py-24 bg-white">
+                    <div className="max-w-5xl mx-auto px-4">
+                        <div className="text-center mb-12">
+                            <div className="text-sm font-semibold text-[#FF4D4D] tracking-wider uppercase mb-4">
+                                USE CASES
+                            </div>
+                            <h2 className="text-3xl lg:text-4xl font-bold text-[#111827] mb-4">
+                                Made for real creators<br />who need real results
+                            </h2>
+                            <p className="text-[#6B7280] max-w-xl mx-auto">
+                                Built for anyone who wants faster production and higher CTR.
+                            </p>
+                        </div>
+
+                        <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
                             <div>
-                                <div className="text-4xl lg:text-5xl font-extrabold text-gradient mb-2">+47%</div>
-                                <div className="text-[#6B7280] font-medium">Average CTR Increase</div>
+                                <div className="flex items-center gap-3 mb-3">
+                                    <Youtube className="w-5 h-5 text-[#FF4D4D]" />
+                                    <h3 className="font-semibold text-[#111827]">Youtubers</h3>
+                                </div>
+                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                    Create multiple thumbnails at once. Get more clicks without spending hours designing.
+                                </p>
                             </div>
                             <div>
-                                <div className="text-4xl lg:text-5xl font-extrabold text-[#111827] mb-2">50K+</div>
-                                <div className="text-[#6B7280] font-medium">Thumbnails Created</div>
+                                <div className="flex items-center gap-3 mb-3">
+                                    <Building2 className="w-5 h-5 text-[#111827]" />
+                                    <h3 className="font-semibold text-[#111827]">Agencies</h3>
+                                </div>
+                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                    Produce 100+ thumbnails weekly with a consistent, premium look.
+                                </p>
                             </div>
                             <div>
-                                <div className="text-4xl lg:text-5xl font-extrabold text-[#111827] mb-2">2x</div>
-                                <div className="text-[#6B7280] font-medium">Faster Workflow</div>
+                                <div className="flex items-center gap-3 mb-3">
+                                    <Image className="w-5 h-5 text-[#FF4D4D]" />
+                                    <h3 className="font-semibold text-[#111827]">Brands</h3>
+                                </div>
+                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                    Keep your visual identity sharp without hiring an in-house designer for every video.
+                                </p>
                             </div>
                             <div>
-                                <div className="text-4xl lg:text-5xl font-extrabold text-[#111827] mb-2">5 sec</div>
-                                <div className="text-[#6B7280] font-medium">Generation Time</div>
+                                <div className="flex items-center gap-3 mb-3">
+                                    <Film className="w-5 h-5 text-[#FF4D4D]" />
+                                    <h3 className="font-semibold text-[#111827]">Short-form Creators</h3>
+                                </div>
+                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                    Produce scroll stopping thumbnails for Shorts, TikTok, and Reels instantly.
+                                </p>
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-3 mb-3">
+                                    <Video className="w-5 h-5 text-[#FF4D4D]" />
+                                    <h3 className="font-semibold text-[#111827]">Content Creators</h3>
+                                </div>
+                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                    Create pro-level thumbnails without touching Photoshop or hiring designers.
+                                </p>
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-3 mb-3">
+                                    <Users className="w-5 h-5 text-[#111827]" />
+                                    <h3 className="font-semibold text-[#111827]">Teams</h3>
+                                </div>
+                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                    Move faster, publish more, and keep every thumbnail on-brand across channels.
+                                </p>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* Features Section */}
-                <section className="py-20 lg:py-28">
+                {/* Features Section - Why Creators Love Us */}
+                <section className="py-16 lg:py-24">
                     <div className="max-w-6xl mx-auto px-4">
                         <div className="text-center mb-16">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-600 text-sm font-semibold mb-4">
@@ -214,25 +264,25 @@ export default function Landing() {
                 </section>
 
                 {/* How It Works */}
-                <section className="py-20 lg:py-28 bg-white border-y border-gray-200">
+                <section className="py-16 lg:py-24 bg-white border-y border-gray-200">
                     <div className="max-w-6xl mx-auto px-4">
                         <div className="text-center mb-16">
                             <h2 className="text-3xl lg:text-5xl font-extrabold text-[#111827] mb-4">
                                 Create thumbnails in 3 simple steps
                             </h2>
-                            <p className="text-lg text-[#6B7280]">
-                                From idea to viral thumbnail in under 30 seconds
+                            <p className="text-lg text-[#6B7280] max-w-2xl mx-auto">
+                                No complex software or design skills required. Just describe and generate.
                             </p>
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-8">
+                        <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
                             <div className="text-center">
                                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6 shadow-lg">
                                     1
                                 </div>
                                 <h3 className="text-xl font-bold text-[#111827] mb-3">Describe Your Video</h3>
                                 <p className="text-[#6B7280]">
-                                    Tell us what your video is about, or upload a reference image for style matching.
+                                    Enter your video title or describe the thumbnail you want. Add any style preferences.
                                 </p>
                             </div>
 
@@ -259,28 +309,204 @@ export default function Landing() {
                     </div>
                 </section>
 
-                {/* Final CTA */}
-                <section className="py-20 lg:py-28">
-                    <div className="max-w-4xl mx-auto px-4 text-center">
-                        <h2 className="text-3xl lg:text-5xl font-extrabold text-[#111827] mb-6">
-                            Ready to 10x your click-through rate?
-                        </h2>
-                        <p className="text-lg text-[#6B7280] mb-10 max-w-2xl mx-auto">
-                            Join 5,000+ creators using our AI to generate thumbnails that get more views. Start free today.
-                        </p>
-                        <Link to="/signup">
-                            <Button size="lg" className="h-14 px-10 text-lg rounded-full btn-gradient border-0 text-white shadow-xl">
-                                Start Creating for Free <ArrowRight className="ml-2 w-5 h-5" />
-                            </Button>
-                        </Link>
-                        <p className="mt-4 text-sm text-[#9CA3AF]">No credit card required • 3 free credits on signup</p>
+                {/* What They Say - Testimonials */}
+                <section className="py-16 lg:py-24">
+                    <div className="max-w-6xl mx-auto px-4">
+                        <div className="text-center mb-12">
+                            <div className="text-sm font-semibold text-[#FF4D4D] tracking-wider uppercase mb-4">
+                                WHAT THEY SAY
+                            </div>
+                            <h2 className="text-3xl lg:text-4xl font-bold text-[#111827] mb-4">
+                                Results that creators actually see
+                            </h2>
+                            <p className="text-[#6B7280] max-w-xl mx-auto">
+                                Proof from the people who use QuikThumb to grow every single day.
+                            </p>
+                        </div>
+
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {/* Testimonial 1 */}
+                            <div className="bg-white p-6 rounded-2xl border border-gray-200">
+                                <div className="flex gap-1 mb-4">
+                                    {[1, 2, 3, 4, 5].map(i => (
+                                        <Star key={i} className="w-4 h-4 text-[#FF4D4D] fill-[#FF4D4D]" />
+                                    ))}
+                                </div>
+                                <h4 className="font-semibold text-[#111827] mb-2">This is an amazing product.</h4>
+                                <p className="text-sm text-[#6B7280] mb-4">
+                                    It is very versatile and easy to work and edit your thumbnails with. In my opinion it beats any other product out there.
+                                </p>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-sm">N</div>
+                                    <span className="text-sm font-medium text-[#111827]">NewsBuddyLove</span>
+                                </div>
+                            </div>
+
+                            {/* Testimonial 2 with image */}
+                            <div className="bg-white p-6 rounded-2xl border border-gray-200">
+                                <div className="flex gap-1 mb-4">
+                                    {[1, 2, 3, 4, 5].map(i => (
+                                        <Star key={i} className="w-4 h-4 text-[#FF4D4D] fill-[#FF4D4D]" />
+                                    ))}
+                                </div>
+                                <div className="rounded-xl overflow-hidden mb-4">
+                                    <img src="/thumbnails/693c0027643cc31826d49e2e_2.webp" alt="Testimonial" className="w-full h-32 object-cover" />
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm">R</div>
+                                    <span className="text-sm font-medium text-[#111827]">Ryan Barne</span>
+                                </div>
+                            </div>
+
+                            {/* Testimonial 3 */}
+                            <div className="bg-white p-6 rounded-2xl border border-gray-200">
+                                <div className="flex gap-1 mb-4">
+                                    {[1, 2, 3, 4, 5].map(i => (
+                                        <Star key={i} className="w-4 h-4 text-[#FF4D4D] fill-[#FF4D4D]" />
+                                    ))}
+                                </div>
+                                <h4 className="font-semibold text-[#111827] mb-2">QuikThumb is amazing.</h4>
+                                <p className="text-sm text-[#6B7280] mb-4">
+                                    I can generate dozens of thumbnails in seconds for A/B tests and new ideas. It saves me so much time and helps me find the best thumbnail for every video.
+                                </p>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold text-sm">B</div>
+                                    <span className="text-sm font-medium text-[#111827]">Badis Design</span>
+                                </div>
+                            </div>
+
+                            {/* Testimonial 4 with image */}
+                            <div className="bg-white p-6 rounded-2xl border border-gray-200">
+                                <div className="flex gap-1 mb-4">
+                                    {[1, 2, 3, 4, 5].map(i => (
+                                        <Star key={i} className="w-4 h-4 text-[#FF4D4D] fill-[#FF4D4D]" />
+                                    ))}
+                                </div>
+                                <div className="rounded-xl overflow-hidden mb-4">
+                                    <img src="/thumbnails/693c0027e566a7f155b72113_3.webp" alt="Testimonial" className="w-full h-32 object-cover" />
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm">N</div>
+                                    <span className="text-sm font-medium text-[#111827]">Nicky Saunders</span>
+                                </div>
+                            </div>
+
+                            {/* Testimonial 5 */}
+                            <div className="bg-white p-6 rounded-2xl border border-gray-200">
+                                <div className="flex gap-1 mb-4">
+                                    {[1, 2, 3, 4, 5].map(i => (
+                                        <Star key={i} className="w-4 h-4 text-[#FF4D4D] fill-[#FF4D4D]" />
+                                    ))}
+                                </div>
+                                <h4 className="font-semibold text-[#111827] mb-2">Just gave this a spin and it nailed the vibe way faster than I expected.</h4>
+                                <p className="text-sm text-[#6B7280] mb-4">
+                                    I usually spend way too long tweaking thumbnails, so being able to try a few variations in minutes is a huge win.
+                                </p>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm">S</div>
+                                    <span className="text-sm font-medium text-[#111827]">Sasha Aleksandrova</span>
+                                </div>
+                            </div>
+
+                            {/* Testimonial 6 */}
+                            <div className="bg-white p-6 rounded-2xl border border-gray-200">
+                                <div className="flex gap-1 mb-4">
+                                    {[1, 2, 3, 4, 5].map(i => (
+                                        <Star key={i} className="w-4 h-4 text-[#FF4D4D] fill-[#FF4D4D]" />
+                                    ))}
+                                </div>
+                                <h4 className="font-semibold text-[#111827] mb-2">Instant thumbnail in seconds!</h4>
+                                <p className="text-sm text-[#6B7280] mb-4">
+                                    I just paste a YouTube link and it instantly creates a thumbnail. It's honestly replacing thumbnail designers.
+                                </p>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-white font-bold text-sm">N</div>
+                                    <span className="text-sm font-medium text-[#111827]">Nick Lauer</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Final CTA - Stop losing views */}
+                <section className="py-16 lg:py-20">
+                    <div className="max-w-4xl mx-auto px-4">
+                        <div className="bg-[#F5F5F5] rounded-3xl p-8 lg:p-12 text-center">
+                            <h2
+                                className="text-2xl sm:text-3xl lg:text-4xl text-black mb-4"
+                                style={{
+                                    fontWeight: 400,
+                                    fontFamily: "'Open Sauce Two', Arial, sans-serif"
+                                }}
+                            >
+                                Stop losing views to<br />mediocre thumbnails
+                            </h2>
+                            <p className="text-[#6B7280] mb-8 max-w-lg mx-auto">
+                                Generate studio-quality thumbnails that stop scrolling and drive clicks in seconds. No design skills needed.
+                            </p>
+
+                            <Link to="/signup">
+                                <button className="h-14 px-1 pr-1 pl-6 text-lg font-semibold rounded-xl bg-gradient-to-r from-[#FF4D4D] to-[#FF003C] text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 inline-flex items-center gap-3 mb-6">
+                                    <span>Generate Thumbnails</span>
+                                    <span className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium">
+                                        Try for free
+                                    </span>
+                                </button>
+                            </Link>
+
+                            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-[#6B7280]">
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle className="w-4 h-4 text-[#FF4D4D]" />
+                                    +50% average CTR increase
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle className="w-4 h-4 text-[#FF4D4D]" />
+                                    2× faster production speed
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle className="w-4 h-4 text-[#FF4D4D]" />
+                                    90% reduction in design cost
+                                </div>
+                            </div>
+
+                            {/* Thumbnails preview */}
+                            <div className="flex justify-center gap-3 mt-8 overflow-hidden">
+                                <img src="/thumbnails/693c00276ba0f2a772954e2a_1.webp" alt="Thumb" className="w-24 sm:w-32 h-auto rounded-xl opacity-60" />
+                                <img src="/thumbnails/693c0027b53031861c55f9f7_5.webp" alt="Thumb" className="w-24 sm:w-32 h-auto rounded-xl" />
+                                <img src="/thumbnails/693c002766c2ad39f57a0b97_4.webp" alt="Thumb" className="w-24 sm:w-32 h-auto rounded-xl" />
+                                <img src="/thumbnails/693c002745c0a13e948d5dbd_6.webp" alt="Thumb" className="w-24 sm:w-32 h-auto rounded-xl opacity-60" />
+                            </div>
+                        </div>
                     </div>
                 </section>
 
                 {/* Footer */}
-                <footer className="py-8 border-t border-gray-200 bg-white">
-                    <div className="max-w-6xl mx-auto px-4 text-center text-sm text-[#9CA3AF]">
-                        © 2026 QuikThumb AI. All rights reserved.
+                <footer className="py-12 border-t border-gray-200 bg-white">
+                    <div className="max-w-4xl mx-auto px-4 text-center">
+                        {/* Logo */}
+                        <Link to="/" className="inline-flex items-center gap-2.5 mb-4">
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center shadow-md">
+                                <Sparkles className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="font-bold text-xl text-[#111827]">QuikThumb</span>
+                        </Link>
+
+                        {/* About text */}
+                        <p className="text-sm text-[#6B7280] max-w-md mx-auto mb-8">
+                            AI-powered thumbnail generator for YouTube creators. Create stunning thumbnails in seconds, not hours.
+                        </p>
+
+                        {/* Footer links */}
+                        <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-[#6B7280]">
+                            <Link to="/pricing" className="hover:text-[#111827] transition-colors">Pricing</Link>
+                            <Link to="/login" className="hover:text-[#111827] transition-colors">Login</Link>
+                            <Link to="/terms" className="hover:text-[#111827] transition-colors">Terms</Link>
+                            <Link to="/privacy" className="hover:text-[#111827] transition-colors">Privacy</Link>
+                        </div>
+
+                        <div className="mt-8 text-xs text-[#9CA3AF]">
+                            © 2026 QuikThumb AI. All rights reserved.
+                        </div>
                     </div>
                 </footer>
             </main>
