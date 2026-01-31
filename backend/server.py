@@ -405,12 +405,14 @@ async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get
 
     txnid = f"tx_{uuid.uuid4().hex[:10]}"
     amount = float(pack["amount"])
+    amount_str = "{:.2f}".format(amount)
     productinfo = pack["name"]
     firstname = user.get("name", "User").split()[0]
     email = user["email"]
     
-    # Hash Order: key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||SALT
-    hash_str = f"{PAYU_KEY}|{txnid}|{amount}|{productinfo}|{firstname}|{email}|||||||||||{PAYU_SALT}"
+    # Hash Order: key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5|udf6|udf7|udf8|udf9|udf10|SALT
+    # This requires 16 pipes in total.
+    hash_str = f"{PAYU_KEY}|{txnid}|{amount_str}|{productinfo}|{firstname}|{email}|||||||||||{PAYU_SALT}"
     payu_hash = hashlib.sha512(hash_str.encode()).hexdigest()
 
     backend_url = os.getenv('BACKEND_URL', "https://ai-thumbnail-50sc.onrender.com")
@@ -419,7 +421,7 @@ async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get
         "params": {
             "key": PAYU_KEY,
             "txnid": txnid,
-            "amount": amount,
+            "amount": amount_str,
             "productinfo": productinfo,
             "firstname": firstname,
             "email": email,
