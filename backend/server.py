@@ -314,73 +314,102 @@ async def generate_thumbnail(req: GenerateRequest, request: Request, user: dict 
         subject_b64 = await fetch_image_b64(req.subject_image)
         reference_b64 = await fetch_image_b64(req.reference_image)
 
-        # Initialize Model
-        model = genai.GenerativeModel('gemini-2.5-flash-image')
-        
-        # Analyze subject and reference to create a perfect prompt
-        analysis_prompt = f"""
-        Analyze these two images (Subject and Style Reference) and create a highly detailed image generation prompt.
-        
-        USER REQUEST:
-        Description: "{req.description}"
-        Text to display: "{req.thumbnail_text}"
-        Aspect Ratio: {req.aspect_ratio}
-        
-        INSTRUCTIONS:
-        1. Keep the likeness of the person/object in the Subject image.
-        2. Match the lighting, colors, and 'vibe' of the Style Reference image.
-        3. Create a prompt for a professional thumbnail with high contrast, vibrant colors, and 'clickbait' appeal.
-        4. The prompt must include instructions to include the text "{req.thumbnail_text}" in a bold, professional font.
-        5. Return ONLY the optimized prompt string. No conversational filler. No parameters like --ar or --v.
-        6. Maximum 200 words.
-        """
+        # Determine dimensions based on aspect ratio for prompt context
+        dimensions = "1280x720 (16:9 landscape)"
+        if req.aspect_ratio == "9:16":
+            dimensions = "720x1280 (9:16 portrait/vertical)"
+        elif req.aspect_ratio == "1:1":
+            dimensions = "1024x1024 (1:1 square)"
 
-        response = await asyncio.to_thread(
-            model.generate_content,
-            [
-                analysis_prompt,
-                {"mime_type": "image/png", "data": base64.b64decode(subject_b64)},
-                {"mime_type": "image/png", "data": base64.b64decode(reference_b64)}
-            ]
+        # Use Gemini 2.0 Flash for image generation with native image output
+        # Create the generation prompt that combines analysis and generation
+        generation_prompt = f"""
+Generate a professional YouTube thumbnail image based on the following:
+
+SUBJECT IMAGE: [First attached image] - Use this person/object as the main subject. Keep their likeness accurate.
+
+STYLE REFERENCE: [Second attached image] - Match the visual style, lighting, colors, composition and mood of this reference.
+
+USER'S DESCRIPTION: "{req.description}"
+
+TEXT TO INCLUDE ON THUMBNAIL: "{req.thumbnail_text}"
+- Render this text prominently on the thumbnail
+- Use bold, eye-catching typography
+- Make the text highly readable with good contrast
+- Position it strategically (top, bottom, or side)
+
+REQUIREMENTS:
+- Dimensions: {dimensions}
+- Style: Professional YouTube thumbnail with high contrast, vibrant colors
+- Appeal: Clickbait-style that grabs attention and maximizes CTR
+- Quality: Clean, sharp, studio-quality output
+- The main subject should be prominent and recognizable
+- Include dramatic lighting and professional composition
+
+Generate the thumbnail image now.
+"""
+
+        # Initialize the image generation client
+        from google import genai as genai_client
+        from google.genai import types
+        
+        client = genai_client.Client(api_key=GOOGLE_API_KEY)
+        
+        # Prepare image parts
+        subject_image_part = types.Part.from_bytes(
+            data=base64.b64decode(subject_b64),
+            mime_type="image/png"
+        )
+        reference_image_part = types.Part.from_bytes(
+            data=base64.b64decode(reference_b64),
+            mime_type="image/png"
         )
         
-        detailed_prompt = response.text.strip()
-        # Remove any --ar or other parameters gemini might have added
-        detailed_prompt = detailed_prompt.split("--")[0].strip()
-        logger.info(f"Generated prompt: {detailed_prompt}")
-
-        # Now use a high-quality image generator (Pollinations Flux)
-        # Limit prompt to 500 chars to avoid URL length issues
-        detailed_prompt = detailed_prompt[:500]
-        encoded_prompt = urllib.parse.quote(detailed_prompt)
+        # Generate image using Gemini native image generation
+        response = await asyncio.to_thread(
+            client.models.generate_content,
+            model="gemini-2.0-flash-exp-image-generation",
+            contents=[
+                generation_prompt,
+                subject_image_part,
+                reference_image_part
+            ],
+            config=types.GenerateContentConfig(
+                response_modalities=['Image', 'Text']
+            )
+        )
         
-        # Determine dimensions based on aspect ratio
-        width, height = 1280, 720
-        if req.aspect_ratio == "9:16":
-            width, height = 720, 1280
-        elif req.aspect_ratio == "1:1":
-            width, height = 1024, 1024
-
-        image_api_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&seed={uuid.uuid4().int % 1000000}&model=nanobanana-pro&nologo=true"
+        # Extract the generated image from response
+        img_data_b64 = None
+        for part in response.candidates[0].content.parts:
+            if hasattr(part, 'inline_data') and part.inline_data is not None:
+                img_bytes = part.inline_data.data
+                img_data_b64 = base64.b64encode(img_bytes).decode("utf-8")
+                break
         
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            image_resp = await client.get(image_api_url)
-            if image_resp.status_code != 200:
-                raise HTTPException(status_code=500, detail="Failed to render image from prompt")
-            
-            img_bytes = image_resp.content
-            if len(img_bytes) < 5000: # Less than 5KB is likely an error or empty
-                 logger.error(f"Pollinations returned suspiciously small file: {len(img_bytes)} bytes")
-                 raise HTTPException(status_code=500, detail="AI generator returned a broken image. Please try a different description.")
-                 
-            img_data_b64 = base64.b64encode(img_bytes).decode("utf-8")
-            
+        if not img_data_b64:
+            # Fallback: Check if there's text response indicating an issue
+            text_response = ""
+            for part in response.candidates[0].content.parts:
+                if hasattr(part, 'text') and part.text:
+                    text_response = part.text
+            logger.error(f"No image generated. Response: {text_response}")
+            raise HTTPException(status_code=500, detail="Failed to generate image. The AI may have declined the request. Please try a different description.")
+        
+        logger.info("Successfully generated thumbnail with Gemini native image generation")
+        
         # 1. Deduct Credit
         await db.users.update_one({"user_id": user["user_id"]}, {"$inc": {"credits": -1}})
         
-        # 2. Use the direct Pollinations URL as the permanent link
-        # This avoids needing Cloudinary or local storage on ephemeral servers like Render
-        image_url = image_api_url
+        # 2. Save image to local storage
+        img_filename = f"{uuid.uuid4()}.png"
+        img_path = os.path.join("static", "images", img_filename)
+        async with aiofiles.open(img_path, "wb") as f:
+            await f.write(base64.b64decode(img_data_b64))
+        
+        # Get the backend URL for serving static files
+        backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
+        image_url = f"{backend_url}/api/static/images/{img_filename}"
 
         # 3. Save to DB
         thumb_id = str(uuid.uuid4())
@@ -390,16 +419,19 @@ async def generate_thumbnail(req: GenerateRequest, request: Request, user: dict 
             "description": req.description,
             "thumbnail_text": req.thumbnail_text,
             "aspect_ratio": req.aspect_ratio,
-            "image_url": image_url, # Points to Pollinations directly
+            "image_url": image_url,
             "created_at": datetime.now(timezone.utc),
         }
         await db.thumbnails.insert_one(thumbnail)
         
         return {"image": f"data:image/png;base64,{img_data_b64}", "credits": user["credits"] - 1, "image_url": image_url}
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Generation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # --- PAYU PAYMENTS ---
 # Define pricing packs
