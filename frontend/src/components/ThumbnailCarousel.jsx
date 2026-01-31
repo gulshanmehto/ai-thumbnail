@@ -18,9 +18,19 @@ const row2Thumbnails = [
 export default function ThumbnailCarousel() {
     return (
         <section className="relative py-12 overflow-hidden">
-            {/* Strong gradient overlays for whitish fade */}
-            <div className="absolute left-0 top-0 bottom-0 w-32 sm:w-48 lg:w-64 bg-gradient-to-r from-[#FAFAFA] via-[#FAFAFA]/80 to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-32 sm:w-48 lg:w-64 bg-gradient-to-l from-[#FAFAFA] via-[#FAFAFA]/80 to-transparent z-10 pointer-events-none" />
+            {/* Strong white gradient overlays */}
+            <div
+                className="absolute left-0 top-0 bottom-0 w-40 sm:w-56 lg:w-72 z-10 pointer-events-none"
+                style={{
+                    background: 'linear-gradient(to right, #FAFAFA 0%, #FAFAFA 20%, rgba(250,250,250,0.8) 50%, rgba(250,250,250,0) 100%)'
+                }}
+            />
+            <div
+                className="absolute right-0 top-0 bottom-0 w-40 sm:w-56 lg:w-72 z-10 pointer-events-none"
+                style={{
+                    background: 'linear-gradient(to left, #FAFAFA 0%, #FAFAFA 20%, rgba(250,250,250,0.8) 50%, rgba(250,250,250,0) 100%)'
+                }}
+            />
 
             <div className="max-w-5xl mx-auto px-4">
                 {/* Row 1 */}
@@ -28,7 +38,7 @@ export default function ThumbnailCarousel() {
                     {row1Thumbnails.map((thumb, i) => (
                         <div
                             key={`row1-${i}`}
-                            className="aspect-video rounded-2xl overflow-hidden bg-gray-100 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                            className="aspect-video rounded-2xl overflow-hidden bg-gray-100 shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                         >
                             <img
                                 src={thumb}
@@ -45,7 +55,7 @@ export default function ThumbnailCarousel() {
                     {row2Thumbnails.map((thumb, i) => (
                         <div
                             key={`row2-${i}`}
-                            className="aspect-video rounded-2xl overflow-hidden bg-gray-100 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                            className="aspect-video rounded-2xl overflow-hidden bg-gray-100 shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                         >
                             <img
                                 src={thumb}

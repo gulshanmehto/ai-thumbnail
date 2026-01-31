@@ -140,13 +140,17 @@ export default function Landing() {
                 <ThumbnailCarousel />
 
                 {/* USE CASES - Made for real creators */}
-                <section className="py-16 lg:py-24 bg-white">
-                    <div className="max-w-5xl mx-auto px-4">
+                <section className="py-16 lg:py-24">
+                    <div className="max-w-6xl mx-auto px-4">
                         <div className="text-center mb-12">
-                            <div className="text-sm font-semibold text-[#FF4D4D] tracking-wider uppercase mb-4">
-                                USE CASES
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-600 text-sm font-semibold mb-4">
+                                <Sparkles className="w-4 h-4" />
+                                Use Cases
                             </div>
-                            <h2 className="text-3xl lg:text-4xl font-bold text-[#111827] mb-4">
+                            <h2
+                                className="text-3xl lg:text-4xl text-[#111827] mb-4"
+                                style={{ fontWeight: 400 }}
+                            >
                                 Made for real creators<br />who need real results
                             </h2>
                             <p className="text-[#6B7280] max-w-xl mx-auto">
@@ -154,58 +158,63 @@ export default function Landing() {
                             </p>
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-                            <div>
-                                <div className="flex items-center gap-3 mb-3">
-                                    <Youtube className="w-5 h-5 text-[#FF4D4D]" />
-                                    <h3 className="font-semibold text-[#111827]">Youtubers</h3>
+                        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+                            <div className="bg-white p-8 rounded-2xl border border-gray-200 hover:border-red-200 hover:shadow-lg transition-all duration-300 group">
+                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <Youtube className="w-7 h-7 text-red-500" />
                                 </div>
-                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">Youtubers</h3>
+                                <p className="text-[#6B7280] leading-relaxed">
                                     Create multiple thumbnails at once. Get more clicks without spending hours designing.
                                 </p>
                             </div>
-                            <div>
-                                <div className="flex items-center gap-3 mb-3">
-                                    <Building2 className="w-5 h-5 text-[#111827]" />
-                                    <h3 className="font-semibold text-[#111827]">Agencies</h3>
+
+                            <div className="bg-white p-8 rounded-2xl border border-gray-200 hover:border-red-200 hover:shadow-lg transition-all duration-300 group">
+                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <Building2 className="w-7 h-7 text-red-500" />
                                 </div>
-                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">Agencies</h3>
+                                <p className="text-[#6B7280] leading-relaxed">
                                     Produce 100+ thumbnails weekly with a consistent, premium look.
                                 </p>
                             </div>
-                            <div>
-                                <div className="flex items-center gap-3 mb-3">
-                                    <Image className="w-5 h-5 text-[#FF4D4D]" />
-                                    <h3 className="font-semibold text-[#111827]">Brands</h3>
+
+                            <div className="bg-white p-8 rounded-2xl border border-gray-200 hover:border-red-200 hover:shadow-lg transition-all duration-300 group">
+                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <Image className="w-7 h-7 text-red-500" />
                                 </div>
-                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">Brands</h3>
+                                <p className="text-[#6B7280] leading-relaxed">
                                     Keep your visual identity sharp without hiring an in-house designer for every video.
                                 </p>
                             </div>
-                            <div>
-                                <div className="flex items-center gap-3 mb-3">
-                                    <Film className="w-5 h-5 text-[#FF4D4D]" />
-                                    <h3 className="font-semibold text-[#111827]">Short-form Creators</h3>
+
+                            <div className="bg-white p-8 rounded-2xl border border-gray-200 hover:border-red-200 hover:shadow-lg transition-all duration-300 group">
+                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <Film className="w-7 h-7 text-red-500" />
                                 </div>
-                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">Short-Form Creators</h3>
+                                <p className="text-[#6B7280] leading-relaxed">
                                     Produce scroll stopping thumbnails for Shorts, TikTok, and Reels instantly.
                                 </p>
                             </div>
-                            <div>
-                                <div className="flex items-center gap-3 mb-3">
-                                    <Video className="w-5 h-5 text-[#FF4D4D]" />
-                                    <h3 className="font-semibold text-[#111827]">Content Creators</h3>
+
+                            <div className="bg-white p-8 rounded-2xl border border-gray-200 hover:border-red-200 hover:shadow-lg transition-all duration-300 group">
+                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <Video className="w-7 h-7 text-red-500" />
                                 </div>
-                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">Content Creators</h3>
+                                <p className="text-[#6B7280] leading-relaxed">
                                     Create pro-level thumbnails without touching Photoshop or hiring designers.
                                 </p>
                             </div>
-                            <div>
-                                <div className="flex items-center gap-3 mb-3">
-                                    <Users className="w-5 h-5 text-[#111827]" />
-                                    <h3 className="font-semibold text-[#111827]">Teams</h3>
+
+                            <div className="bg-white p-8 rounded-2xl border border-gray-200 hover:border-red-200 hover:shadow-lg transition-all duration-300 group">
+                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <Users className="w-7 h-7 text-red-500" />
                                 </div>
-                                <p className="text-sm text-[#6B7280] leading-relaxed">
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">Teams</h3>
+                                <p className="text-[#6B7280] leading-relaxed">
                                     Move faster, publish more, and keep every thumbnail on-brand across channels.
                                 </p>
                             </div>
@@ -214,17 +223,24 @@ export default function Landing() {
                 </section>
 
                 {/* Features Section - Why Creators Love Us */}
-                <section className="py-16 lg:py-24">
+                <section className="py-16 lg:py-24 relative overflow-hidden">
+                    {/* Subtle red gradient bg */}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-red-100/50 to-transparent rounded-full blur-3xl -z-10" />
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-pink-100/50 to-transparent rounded-full blur-3xl -z-10" />
+
                     <div className="max-w-6xl mx-auto px-4">
                         <div className="text-center mb-16">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-600 text-sm font-semibold mb-4">
                                 <Sparkles className="w-4 h-4" />
                                 Why Creators Love Us
                             </div>
-                            <h2 className="text-3xl lg:text-5xl font-extrabold text-[#111827] mb-4">
+                            <h2
+                                className="text-3xl lg:text-4xl text-[#111827] mb-4"
+                                style={{ fontWeight: 400 }}
+                            >
                                 Built for creators who want results
                             </h2>
-                            <p className="text-lg text-[#6B7280] max-w-2xl mx-auto">
+                            <p className="text-[#6B7280] max-w-2xl mx-auto">
                                 Our AI is trained on 50,000+ viral thumbnails to understand what makes viewers click.
                             </p>
                         </div>
@@ -234,27 +250,27 @@ export default function Landing() {
                                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                     <Zap className="w-7 h-7 text-red-500" />
                                 </div>
-                                <h3 className="text-xl font-bold text-[#111827] mb-3">Lightning Fast</h3>
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">Lightning Fast</h3>
                                 <p className="text-[#6B7280] leading-relaxed">
                                     Generate professional thumbnails in under 5 seconds. Speed up your content pipeline by 10x.
                                 </p>
                             </div>
 
                             <div className="bg-white p-8 rounded-2xl border border-gray-200 hover:border-red-200 hover:shadow-lg transition-all duration-300 group">
-                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                    <TrendingUp className="w-7 h-7 text-orange-500" />
+                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <TrendingUp className="w-7 h-7 text-red-500" />
                                 </div>
-                                <h3 className="text-xl font-bold text-[#111827] mb-3">CTR Optimized</h3>
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">CTR Optimized</h3>
                                 <p className="text-[#6B7280] leading-relaxed">
                                     AI trained on viral content patterns. Every thumbnail is designed to maximize click-through rates.
                                 </p>
                             </div>
 
                             <div className="bg-white p-8 rounded-2xl border border-gray-200 hover:border-red-200 hover:shadow-lg transition-all duration-300 group">
-                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                    <MousePointerClick className="w-7 h-7 text-pink-500" />
+                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <MousePointerClick className="w-7 h-7 text-red-500" />
                                 </div>
-                                <h3 className="text-xl font-bold text-[#111827] mb-3">No Design Skills</h3>
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">No Design Skills</h3>
                                 <p className="text-[#6B7280] leading-relaxed">
                                     Just describe your video or upload a reference. Our AI handles the design, colors, and composition.
                                 </p>
@@ -264,43 +280,50 @@ export default function Landing() {
                 </section>
 
                 {/* How It Works */}
-                <section className="py-16 lg:py-24 bg-white border-y border-gray-200">
+                <section className="py-16 lg:py-24">
                     <div className="max-w-6xl mx-auto px-4">
                         <div className="text-center mb-16">
-                            <h2 className="text-3xl lg:text-5xl font-extrabold text-[#111827] mb-4">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-600 text-sm font-semibold mb-4">
+                                <Sparkles className="w-4 h-4" />
+                                How It Works
+                            </div>
+                            <h2
+                                className="text-3xl lg:text-4xl text-[#111827] mb-4"
+                                style={{ fontWeight: 400 }}
+                            >
                                 Create thumbnails in 3 simple steps
                             </h2>
-                            <p className="text-lg text-[#6B7280] max-w-2xl mx-auto">
+                            <p className="text-[#6B7280] max-w-2xl mx-auto">
                                 No complex software or design skills required. Just describe and generate.
                             </p>
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
                             <div className="text-center">
-                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                <div className="text-5xl lg:text-6xl font-bold text-[#FF4D4D] mb-6">
                                     1
                                 </div>
-                                <h3 className="text-xl font-bold text-[#111827] mb-3">Describe Your Video</h3>
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">Describe Your Video</h3>
                                 <p className="text-[#6B7280]">
                                     Enter your video title or describe the thumbnail you want. Add any style preferences.
                                 </p>
                             </div>
 
                             <div className="text-center">
-                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                <div className="text-5xl lg:text-6xl font-bold text-[#FF4D4D] mb-6">
                                     2
                                 </div>
-                                <h3 className="text-xl font-bold text-[#111827] mb-3">AI Generates Options</h3>
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">AI Generates Options</h3>
                                 <p className="text-[#6B7280]">
                                     Our AI creates multiple thumbnail options optimized for maximum engagement.
                                 </p>
                             </div>
 
                             <div className="text-center">
-                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-pink-500 text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                <div className="text-5xl lg:text-6xl font-bold text-[#FF4D4D] mb-6">
                                     3
                                 </div>
-                                <h3 className="text-xl font-bold text-[#111827] mb-3">Download & Upload</h3>
+                                <h3 className="text-xl font-semibold text-[#111827] mb-3">Download & Upload</h3>
                                 <p className="text-[#6B7280]">
                                     Pick your favorite, download in HD, and upload directly to YouTube.
                                 </p>
@@ -310,13 +333,20 @@ export default function Landing() {
                 </section>
 
                 {/* What They Say - Testimonials */}
-                <section className="py-16 lg:py-24">
+                <section className="py-16 lg:py-24 relative overflow-hidden">
+                    {/* Subtle red gradient bg */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-red-100/30 via-pink-100/30 to-red-100/30 rounded-full blur-3xl -z-10" />
+
                     <div className="max-w-6xl mx-auto px-4">
                         <div className="text-center mb-12">
-                            <div className="text-sm font-semibold text-[#FF4D4D] tracking-wider uppercase mb-4">
-                                WHAT THEY SAY
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-600 text-sm font-semibold mb-4">
+                                <Sparkles className="w-4 h-4" />
+                                What They Say
                             </div>
-                            <h2 className="text-3xl lg:text-4xl font-bold text-[#111827] mb-4">
+                            <h2
+                                className="text-3xl lg:text-4xl text-[#111827] mb-4"
+                                style={{ fontWeight: 400 }}
+                            >
                                 Results that creators actually see
                             </h2>
                             <p className="text-[#6B7280] max-w-xl mx-auto">
@@ -434,10 +464,7 @@ export default function Landing() {
                         <div className="bg-[#F5F5F5] rounded-3xl p-8 lg:p-12 text-center">
                             <h2
                                 className="text-2xl sm:text-3xl lg:text-4xl text-black mb-4"
-                                style={{
-                                    fontWeight: 400,
-                                    fontFamily: "'Open Sauce Two', Arial, sans-serif"
-                                }}
+                                style={{ fontWeight: 400 }}
                             >
                                 Stop losing views to<br />mediocre thumbnails
                             </h2>
@@ -481,7 +508,7 @@ export default function Landing() {
                 </section>
 
                 {/* Footer */}
-                <footer className="py-12 border-t border-gray-200 bg-white">
+                <footer className="py-12 border-t border-gray-200">
                     <div className="max-w-4xl mx-auto px-4 text-center">
                         {/* Logo */}
                         <Link to="/" className="inline-flex items-center gap-2.5 mb-4">
