@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -51,30 +51,7 @@ export default function AdminDashboard() {
 
     const navigate = useNavigate();
 
-    // Check auth and load data
-    useEffect(() => {
-        checkAuth();
-    }, []);
-
-    useEffect(() => {
-        if (activeTab === 'users') {
-            loadUsers(userPage, searchQuery);
-        } else if (activeTab === 'transactions') {
-            loadTransactions(txnPage);
-        }
-    }, [activeTab, userPage, txnPage]);
-
-    const checkAuth = async () => {
-        try {
-            await axios.get(`${API_URL}/admin/check`, { withCredentials: true });
-            loadStats();
-            loadDiscounts();
-        } catch (err) {
-            navigate('/admin/login');
-        }
-    };
-
-    const loadStats = async () => {
+    const loadStats = useCallback(async () => {
         try {
             const res = await axios.get(`${API_URL}/admin/stats`, { withCredentials: true });
             setStats(res.data);
@@ -83,9 +60,18 @@ export default function AdminDashboard() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const loadUsers = async (page = 1, search = '') => {
+    const loadDiscounts = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API_URL}/admin/discounts`, { withCredentials: true });
+            setDiscounts(res.data);
+        } catch (err) {
+            console.error('Failed to load discounts:', err);
+        }
+    }, []);
+
+    const loadUsers = useCallback(async (page = 1, search = '') => {
         try {
             const res = await axios.get(`${API_URL}/admin/users`, {
                 params: { page, limit: 15, search: search || undefined },
@@ -95,18 +81,9 @@ export default function AdminDashboard() {
         } catch (err) {
             console.error('Failed to load users:', err);
         }
-    };
+    }, []);
 
-    const loadDiscounts = async () => {
-        try {
-            const res = await axios.get(`${API_URL}/admin/discounts`, { withCredentials: true });
-            setDiscounts(res.data);
-        } catch (err) {
-            console.error('Failed to load discounts:', err);
-        }
-    };
-
-    const loadTransactions = async (page = 1) => {
+    const loadTransactions = useCallback(async (page = 1) => {
         try {
             const res = await axios.get(`${API_URL}/admin/transactions`, {
                 params: { page, limit: 15 },
@@ -116,7 +93,31 @@ export default function AdminDashboard() {
         } catch (err) {
             console.error('Failed to load transactions:', err);
         }
-    };
+    }, []);
+
+    // Check auth and load data
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                await axios.get(`${API_URL}/admin/check`, { withCredentials: true });
+                loadStats();
+                loadDiscounts();
+            } catch (err) {
+                navigate('/admin/login');
+            }
+        };
+        checkAuth();
+    }, [navigate, loadStats, loadDiscounts]);
+
+    useEffect(() => {
+        if (activeTab === 'users') {
+            loadUsers(userPage, searchQuery);
+        } else if (activeTab === 'transactions') {
+            loadTransactions(txnPage);
+        }
+    }, [activeTab, userPage, txnPage, searchQuery, loadUsers, loadTransactions]);
+
+
 
     const handleLogout = async () => {
         await axios.post(`${API_URL}/admin/logout`, {}, { withCredentials: true });
@@ -205,8 +206,8 @@ export default function AdminDashboard() {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === tab.id
-                                    ? 'bg-red-500 text-white'
-                                    : 'bg-[#1F2937] text-gray-400 hover:text-white'
+                                ? 'bg-red-500 text-white'
+                                : 'bg-[#1F2937] text-gray-400 hover:text-white'
                                 }`}
                         >
                             <tab.icon className="w-4 h-4" />
@@ -457,8 +458,8 @@ export default function AdminDashboard() {
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <span className={`px-2 py-1 rounded text-xs font-medium ${discount.is_active
-                                                                ? 'bg-green-500/20 text-green-400'
-                                                                : 'bg-red-500/20 text-red-400'
+                                                            ? 'bg-green-500/20 text-green-400'
+                                                            : 'bg-red-500/20 text-red-400'
                                                             }`}>
                                                             {discount.is_active ? 'Active' : 'Inactive'}
                                                         </span>
@@ -529,8 +530,8 @@ export default function AdminDashboard() {
                                                 <td className="px-6 py-4 text-gray-300">{txn.pack_id}</td>
                                                 <td className="px-6 py-4">
                                                     <span className={`px-2 py-1 rounded text-xs font-medium ${txn.status === 'success'
-                                                            ? 'bg-green-500/20 text-green-400'
-                                                            : 'bg-red-500/20 text-red-400'
+                                                        ? 'bg-green-500/20 text-green-400'
+                                                        : 'bg-red-500/20 text-red-400'
                                                         }`}>
                                                         {txn.status}
                                                     </span>
