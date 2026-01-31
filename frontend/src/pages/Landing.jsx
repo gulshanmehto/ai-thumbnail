@@ -18,7 +18,7 @@ export default function Landing() {
                         <h1
                             className="text-[32px] sm:text-[40px] lg:text-[48px] text-black mb-5 animate-fade-in"
                             style={{
-                                fontWeight: 600,
+                                fontWeight: 400,
                                 lineHeight: '55px',
                                 fontFamily: "'Open Sauce Two', Arial, sans-serif"
                             }}
