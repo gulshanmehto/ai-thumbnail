@@ -12,6 +12,18 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Setup axios to include token from localStorage
+  useEffect(() => {
+    const interceptor = axios.interceptors.request.use((config) => {
+      const token = localStorage.getItem('session_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+    return () => axios.interceptors.request.eject(interceptor);
+  }, []);
+
   useEffect(() => {
     checkAuth();
   }, []);
@@ -48,6 +60,11 @@ export const AuthProvider = ({ children }) => {
       const { data } = await axios.post(`${BACKEND_URL}/api/auth/login`, {
         email, password
       }, { withCredentials: true });
+
+      if (data.session_token) {
+        localStorage.setItem('session_token', data.session_token);
+      }
+
       setUser(data.user);
       toast.success('Logged in successfully');
       return true;
@@ -62,6 +79,11 @@ export const AuthProvider = ({ children }) => {
       const { data } = await axios.post(`${BACKEND_URL}/api/auth/signup`, {
         email, password, name
       }, { withCredentials: true });
+
+      if (data.session_token) {
+        localStorage.setItem('session_token', data.session_token);
+      }
+
       setUser(data.user);
       toast.success('Account created successfully');
       return true;
@@ -74,6 +96,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true });
+      localStorage.removeItem('session_token');
       setUser(null);
       window.location.href = '/';
     } catch (error) {
