@@ -553,15 +553,20 @@ async def get_admin_user(request: Request):
             logger.warning(f"Expired Admin Session ID: {session_id}")
             raise HTTPException(status_code=401, detail="Session expired")
         
-        # Convert to plain dict to avoid Pydantic issues
-        session["_id"] = str(session["_id"]) 
-        return session
+        # Safe Conversion: Ensure this is a clean dict for FastAPI
+        safe_session = {
+            "session_id": session["session_id"],
+            "created_at": session["created_at"],
+            "id": str(session["_id"]) if "_id" in session else None
+        }
+        return safe_session
         
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Auth Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Auth Error: {str(e)}")
+        # Return a 401 instead of 500 so frontend handles it better
+        raise HTTPException(status_code=401, detail=f"Auth Error: {str(e)}")
 
 @api_router.post("/admin/login")
 async def admin_login(req: AdminLoginRequest, response: Response):
@@ -596,7 +601,7 @@ async def admin_login(req: AdminLoginRequest, response: Response):
 
 @api_router.get("/admin/check")
 async def check_admin_session(admin: dict = Depends(get_admin_user)):
-    return {"status": "authenticated", "admin_id": admin["session_id"]}
+    return {"status": "authenticated", "admin_id": admin.get("session_id")}
 
 @api_router.post("/admin/logout")
 async def admin_logout(response: Response):
