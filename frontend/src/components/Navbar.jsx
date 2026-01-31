@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/button';
-import { Sparkles, LayoutGrid, CreditCard, LogOut, Images } from 'lucide-react';
+import { Sparkles, LayoutGrid, CreditCard, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -22,12 +22,6 @@ export default function Navbar() {
         <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
           {user ? (
             <>
-              <Link to="/showcase" className="hidden sm:block">
-                <Button variant="ghost" className="gap-2 text-[#4B5563] hover:text-[#111827] hover:bg-gray-100">
-                  <Images className="w-4 h-4" />
-                  <span className="hidden lg:inline">Showcase</span>
-                </Button>
-              </Link>
               <Link to="/dashboard">
                 <Button variant="ghost" className="gap-2 text-[#4B5563] hover:text-[#111827] hover:bg-gray-100 px-2 sm:px-4">
                   <LayoutGrid className="w-4 h-4" />
@@ -53,9 +47,6 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/showcase" className="text-sm font-medium text-[#4B5563] hover:text-[#111827] transition-colors hidden sm:block px-3 py-2">
-                Showcase
-              </Link>
               <Link to="/pricing" className="text-sm font-medium text-[#4B5563] hover:text-[#111827] transition-colors hidden xs:block px-3 py-2">
                 Pricing
               </Link>

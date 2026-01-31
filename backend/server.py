@@ -268,6 +268,26 @@ async def get_showcase():
     thumbnails = await thumbnails_cursor.to_list(length=40)
     return thumbnails
 
+@api_router.delete("/thumbnails/{thumbnail_id}")
+async def delete_thumbnail(thumbnail_id: str, user: dict = Depends(get_current_user)):
+    # Find the thumbnail first to verify ownership
+    thumbnail = await db.thumbnails.find_one({"id": thumbnail_id, "user_id": user["user_id"]})
+    if not thumbnail:
+        raise HTTPException(status_code=404, detail="Thumbnail not found")
+    
+    # Delete the image file if it exists
+    if thumbnail.get("image_url"):
+        file_path = os.path.join("generated_images", os.path.basename(thumbnail["image_url"]))
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                logger.warning(f"Failed to delete image file: {e}")
+    
+    # Delete from database
+    await db.thumbnails.delete_one({"id": thumbnail_id, "user_id": user["user_id"]})
+    return {"message": "Thumbnail deleted successfully"}
+
 @api_router.post("/generate")
 async def generate_thumbnail(req: GenerateRequest, request: Request, user: dict = Depends(get_current_user)):
     if user["credits"] <= 0:

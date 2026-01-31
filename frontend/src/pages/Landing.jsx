@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthContext';
-import { ArrowRight, Zap, PlayCircle, CheckCircle2, Star, TrendingUp, Clock, Shield, Sparkles, MousePointerClick } from 'lucide-react';
+import { ArrowRight, Zap, CheckCircle2, Star, TrendingUp, Sparkles, MousePointerClick } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Landing() {
@@ -49,10 +49,6 @@ export default function Landing() {
                                     </Button>
                                 </Link>
                             )}
-                            <Link to="/showcase" className="flex items-center gap-2 text-[#4B5563] font-semibold hover:text-[#111827] transition-colors">
-                                <PlayCircle className="w-5 h-5" />
-                                <span>See Examples</span>
-                            </Link>
                         </div>
 
                         {/* Trust Badges */}
