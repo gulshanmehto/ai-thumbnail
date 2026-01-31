@@ -63,12 +63,15 @@ api_router = APIRouter(prefix="/api")
 
 # CORS
 cors_origins_raw = os.getenv("CORS_ORIGINS", "")
+origins = ["http://localhost:3000", "https://ai-thumbnail-phi.vercel.app"] # Base fallbacks
+
 if cors_origins_raw and cors_origins_raw != "*":
-    origins = [o.strip() for o in cors_origins_raw.split(",") if o.strip()]
-else:
-    # Default for local development if not set, but warning for production
-    origins = ["http://localhost:3000"]
-    logger.warning("CORS_ORIGINS not set or set to *. Defaulting to http://localhost:3000 for safety.")
+    extra_origins = [o.strip().rstrip("/") for o in cors_origins_raw.split(",") if o.strip()]
+    origins.extend(extra_origins)
+    # Remove duplicates
+    origins = list(set(origins))
+
+logger.info(f"Allowed CORS Origins: {origins}")
 
 app.add_middleware(
     CORSMiddleware,
