@@ -108,14 +108,12 @@ export default function AdminDashboard() {
     }, [getAuthHeaders]);
 
     // Check auth and load data
+
     useEffect(() => {
         const checkAuth = async () => {
             try {
                 const token = getAuthHeaders()['X-Admin-Token'];
-                console.log("Checking Admin Auth with Token:", token ? token.substring(0, 10) + '...' : 'NONE');
-
                 if (!token) {
-                    console.warn("No admin token found in localStorage");
                     navigate('/admin/login');
                     return;
                 }
@@ -124,19 +122,17 @@ export default function AdminDashboard() {
                     withCredentials: true,
                     headers: getAuthHeaders()
                 });
-                console.log("Admin Auth Success");
+
                 loadStats();
                 loadDiscounts();
             } catch (err) {
-                console.error("Admin Auth Check Failed:", err);
-                const errorDetail = err.response?.data ? JSON.stringify(err.response.data) : err.message;
-                console.error("FULL ERROR DETAILS:", errorDetail);
-                // navigate('/admin/login'); // Auto-redirect disabled for debugging
-                toast.error(`Auth Failed: ${errorDetail}`);
+                console.error("Admin session check failed", err);
+                navigate('/admin/login');
             }
         };
         checkAuth();
     }, [navigate, loadStats, loadDiscounts, getAuthHeaders]);
+
 
     useEffect(() => {
         if (activeTab === 'users') {
