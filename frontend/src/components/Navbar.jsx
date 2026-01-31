@@ -26,6 +26,9 @@ export default function Navbar() {
           <Link to="/pricing" className="text-sm font-medium text-[#6B7280] hover:text-[#111827] transition-colors">
             Pricing
           </Link>
+          <Link to="/affiliate" className="text-sm font-medium text-[#6B7280] hover:text-[#111827] transition-colors">
+            Affiliate
+          </Link>
         </div>
 
         {/* Right Navigation */}

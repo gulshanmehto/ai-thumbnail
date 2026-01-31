@@ -10,6 +10,7 @@ import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
 import Pricing from './pages/Pricing';
 import Showcase from './pages/Showcase';
+import Affiliate from './pages/Affiliate';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -30,6 +31,7 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/affiliate" element={<Affiliate />} />
         <Route path="/showcase" element={<Showcase />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
