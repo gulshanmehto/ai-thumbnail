@@ -68,7 +68,7 @@ export default function Pricing() {
         {
             name: 'Starter',
             description: 'For individual creators',
-            price: { monthly: '₹1,499', annual: '₹999' },
+            price: { monthly: '₹999', annual: '₹599' },
             credits: '50 credits',
             validity: '30 days validity',
             features: [
@@ -85,7 +85,7 @@ export default function Pricing() {
         {
             name: 'Creator',
             description: 'Most popular for YouTubers',
-            price: { monthly: '₹3,499', annual: '₹2,499' },
+            price: { monthly: '₹2,499', annual: '₹1,499' },
             credits: '150 credits',
             validity: '60 days validity',
             features: [
@@ -102,7 +102,7 @@ export default function Pricing() {
         {
             name: 'Pro',
             description: 'For agencies & power users',
-            price: { monthly: '₹7,999', annual: '₹4,999' },
+            price: { monthly: '₹4,999', annual: '₹2,999' },
             credits: '400 credits',
             validity: '90 days validity',
             features: [
@@ -158,8 +158,8 @@ export default function Pricing() {
                         <div
                             key={plan.name}
                             className={`relative bg-white rounded-3xl p-6 lg:p-8 border transition-all duration-300 flex flex-col ${plan.popular
-                                    ? 'border-red-500 shadow-xl scale-[1.02] lg:scale-105 z-10'
-                                    : 'border-gray-200 hover:border-gray-300 hover:shadow-lg'
+                                ? 'border-red-500 shadow-xl scale-[1.02] lg:scale-105 z-10'
+                                : 'border-gray-200 hover:border-gray-300 hover:shadow-lg'
                                 }`}
                         >
                             {/* Popular Badge */}
@@ -197,8 +197,8 @@ export default function Pricing() {
                             <Button
                                 onClick={plan.ctaAction}
                                 className={`w-full h-12 rounded-xl font-semibold mb-6 transition-all ${plan.popular
-                                        ? 'btn-gradient text-white border-0 shadow-lg'
-                                        : 'bg-white border-2 border-gray-200 text-[#111827] hover:border-gray-300 hover:bg-gray-50'
+                                    ? 'btn-gradient text-white border-0 shadow-lg'
+                                    : 'bg-white border-2 border-gray-200 text-[#111827] hover:border-gray-300 hover:bg-gray-50'
                                     }`}
                             >
                                 {plan.cta}
