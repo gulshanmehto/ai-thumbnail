@@ -129,9 +129,10 @@ export default function AdminDashboard() {
                 loadDiscounts();
             } catch (err) {
                 console.error("Admin Auth Check Failed:", err);
-                console.error("Error Response:", err.response);
+                const errorDetail = err.response?.data ? JSON.stringify(err.response.data) : err.message;
+                console.error("FULL ERROR DETAILS:", errorDetail);
                 // navigate('/admin/login'); // Auto-redirect disabled for debugging
-                toast.error(`Session Error: ${err.message}. Check console.`);
+                toast.error(`Auth Failed: ${errorDetail}`);
             }
         };
         checkAuth();
