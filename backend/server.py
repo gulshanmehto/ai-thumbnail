@@ -2,27 +2,49 @@ from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Respons
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
+import hashlib
+import hmac
 import os
 import uuid
 import stripe
 import httpx
+import google.generativeai as genai
+import asyncio
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
-from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
 import logging
 import base64
 import aiofiles
+import urllib.parse
+
 
 # Load env
 load_dotenv()
 
+def get_password_hash(password: str) -> str:
+    salt = os.urandom(16)
+    hash_obj = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
+    return f"{salt.hex()}:{hash_obj.hex()}"
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    if not stored_hash or ":" not in stored_hash:
+        return False
+    salt_hex, hash_hex = stored_hash.split(":")
+    salt = bytes.fromhex(salt_hex)
+    expected_hash = bytes.fromhex(hash_hex)
+    new_hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
+    return hmac.compare_digest(new_hash, expected_hash)
+
 # Config
 MONGO_URL = os.getenv("MONGO_URL")
 DB_NAME = os.getenv("DB_NAME")
-EMERGENT_KEY = os.getenv("EMERGENT_LLM_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 STRIPE_KEY = os.getenv("STRIPE_SECRET_KEY")
+
+if GOOGLE_API_KEY:
+    genai.configure(api_key=GOOGLE_API_KEY)
 
 stripe.api_key = STRIPE_KEY
 
@@ -78,6 +100,15 @@ class ThumbnailResponse(BaseModel):
     image_url: Optional[str] = None
     created_at: datetime
 
+class SignupRequest(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
 class CheckoutRequest(BaseModel):
     pack_id: str
 
@@ -105,9 +136,12 @@ async def get_current_user(request: Request):
     if expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="Session expired")
         
-    user = await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0})
+    user = await db.users.find_one({"user_id": session["user_id"]})
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
+    
+    if "_id" in user:
+        del user["_id"]
         
     return user
 
@@ -117,39 +151,61 @@ async def root():
     return {"status": "ok"}
 
 # --- AUTH ---
-@api_router.get("/auth/session-data")
-async def get_session_data(request: Request, response: Response):
-    session_id = request.headers.get("X-Session-ID")
-    if not session_id:
-        raise HTTPException(status_code=400, detail="Missing X-Session-ID")
-        
-    async with httpx.AsyncClient() as client:
-        res = await client.get(
-            "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
-            headers={"X-Session-ID": session_id}
-        )
-        
-    if res.status_code != 200:
-        raise HTTPException(status_code=401, detail="Invalid session ID")
-        
-    data = res.json()
-    email = data.get("email")
-    name = data.get("name")
-    picture = data.get("picture")
+@api_router.post("/auth/signup")
+async def signup(req: SignupRequest, response: Response):
+    user = await db.users.find_one({"email": req.email})
+    if user:
+        raise HTTPException(status_code=400, detail="Email already registered")
     
-    user = await db.users.find_one({"email": email}, {"_id": 0})
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    hashed_password = get_password_hash(req.password)
+    
+    new_user = {
+        "user_id": user_id,
+        "email": req.email,
+        "name": req.name,
+        "password_hash": hashed_password,
+        "picture": f"https://api.dicebear.com/7.x/avataaars/svg?seed={req.name}",
+        "credits": 5,
+        "created_at": datetime.now(timezone.utc)
+    }
+    await db.users.insert_one(new_user)
+    
+    session_token = str(uuid.uuid4())
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    
+    await db.user_sessions.insert_one({
+        "user_id": user_id,
+        "session_token": session_token,
+        "expires_at": expires_at,
+        "created_at": datetime.now(timezone.utc)
+    })
+    
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=7 * 24 * 60 * 60
+    )
+    
+    # Don't return password hash or MongoDB _id
+    if "password_hash" in new_user:
+        del new_user["password_hash"]
+    if "_id" in new_user:
+        del new_user["_id"]
+        
+    return {"user": new_user, "session_token": session_token}
+
+@api_router.post("/auth/login")
+async def login(req: LoginRequest, response: Response):
+    user = await db.users.find_one({"email": req.email})
     if not user:
-        user_id = f"user_{uuid.uuid4().hex[:12]}"
-        new_user = {
-            "user_id": user_id,
-            "email": email,
-            "name": name,
-            "picture": picture,
-            "credits": 5,
-            "created_at": datetime.now(timezone.utc)
-        }
-        await db.users.insert_one(new_user)
-        user = new_user
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not verify_password(req.password, user.get("password_hash", "")):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
     
     session_token = str(uuid.uuid4())
     expires_at = datetime.now(timezone.utc) + timedelta(days=7)
@@ -170,6 +226,12 @@ async def get_session_data(request: Request, response: Response):
         max_age=7 * 24 * 60 * 60
     )
     
+    # Don't return password hash
+    if "password_hash" in user:
+        del user["password_hash"]
+    if "_id" in user:
+        del user["_id"]
+        
     return {"user": user, "session_token": session_token}
 
 @api_router.get("/auth/me")
@@ -191,66 +253,107 @@ async def get_thumbnails(request: Request, user: dict = Depends(get_current_user
     thumbnails = await thumbnails_cursor.to_list(length=100)
     return thumbnails
 
+@api_router.get("/showcase", response_model=List[ThumbnailResponse])
+async def get_showcase():
+    thumbnails_cursor = db.thumbnails.find({}, {"_id": 0}).sort("created_at", -1).limit(40)
+    thumbnails = await thumbnails_cursor.to_list(length=40)
+    return thumbnails
+
 @api_router.post("/generate")
 async def generate_thumbnail(req: GenerateRequest, request: Request, user: dict = Depends(get_current_user)):
     if user["credits"] <= 0:
         raise HTTPException(status_code=402, detail="No credits left")
         
     try:
-        chat = LlmChat(
-            api_key=EMERGENT_KEY, 
-            session_id=f"gen_{user['user_id']}",
-            system_message="You are a professional YouTube thumbnail designer. You are expert in creating high CTR thumbnails."
-        )
-        chat.with_model("gemini", "gemini-3-pro-image-preview").with_params(modalities=["image", "text"])
-        
-        prompt = f"""
-        Create a high-quality YouTube thumbnail.
-        
-        Task:
-        1. Use the SUBJECT from the first image provided. Keep their likeness/appearance.
-        2. Use the STYLE and COMPOSITION from the second image provided (Reference).
-        3. The thumbnail aspect ratio must be {req.aspect_ratio}.
-        4. The overall scene description is: "{req.description}".
-        5. IMPORTANT: You MUST BAKE the following text into the image clearly and professionally: "{req.thumbnail_text}".
-        
-        Make it eye-catching, high contrast, and professional. 
-        """
-        
+        # Check if API key is configured
+        if not GOOGLE_API_KEY or GOOGLE_API_KEY == "your_google_api_key":
+            raise HTTPException(status_code=500, detail="Google API Key not configured in .env")
+
         def clean_b64(b64_str):
             if "base64," in b64_str:
                 return b64_str.split("base64,")[1]
             return b64_str
 
-        subject_b64 = clean_b64(req.subject_image)
-        reference_b64 = clean_b64(req.reference_image)
+        async def fetch_image_b64(img_input):
+            if img_input.startswith("http"):
+                async with httpx.AsyncClient() as client:
+                    resp = await client.get(img_input)
+                    if resp.status_code == 200:
+                        return base64.b64encode(resp.content).decode("utf-8")
+            return clean_b64(img_input)
+
+        subject_b64 = await fetch_image_b64(req.subject_image)
+        reference_b64 = await fetch_image_b64(req.reference_image)
+
+        # Initialize Model
+        model = genai.GenerativeModel('gemini-flash-latest')
         
-        msg = UserMessage(
-            text=prompt,
-            file_contents=[
-                ImageContent(subject_b64),
-                ImageContent(reference_b64)
+        # Analyze subject and reference to create a perfect prompt
+        analysis_prompt = f"""
+        Analyze these two images (Subject and Style Reference) and create a highly detailed image generation prompt.
+        
+        USER REQUEST:
+        Description: "{req.description}"
+        Text to display: "{req.thumbnail_text}"
+        Aspect Ratio: {req.aspect_ratio}
+        
+        INSTRUCTIONS:
+        1. Keep the likeness of the person/object in the Subject image.
+        2. Match the lighting, colors, and 'vibe' of the Style Reference image.
+        3. Create a prompt for a professional thumbnail with high contrast, vibrant colors, and 'clickbait' appeal.
+        4. The prompt must include instructions to include the text "{req.thumbnail_text}" in a bold, professional font.
+        5. Return ONLY the optimized prompt string. No conversational filler. No parameters like --ar or --v.
+        6. Maximum 200 words.
+        """
+
+        response = await asyncio.to_thread(
+            model.generate_content,
+            [
+                analysis_prompt,
+                {"mime_type": "image/png", "data": base64.b64decode(subject_b64)},
+                {"mime_type": "image/png", "data": base64.b64decode(reference_b64)}
             ]
         )
         
-        text, images = await chat.send_message_multimodal_response(msg)
+        detailed_prompt = response.text.strip()
+        # Remove any --ar or other parameters gemini might have added
+        detailed_prompt = detailed_prompt.split("--")[0].strip()
+        logger.info(f"Generated prompt: {detailed_prompt}")
+
+        # Now use a high-quality image generator (Pollinations Flux)
+        # Limit prompt to 500 chars to avoid URL length issues
+        detailed_prompt = detailed_prompt[:500]
+        encoded_prompt = urllib.parse.quote(detailed_prompt)
         
-        if not images:
-            raise HTTPException(status_code=500, detail="No image generated")
+        # Determine dimensions based on aspect ratio
+        width, height = 1280, 720
+        if req.aspect_ratio == "9:16":
+            width, height = 720, 1280
+        elif req.aspect_ratio == "1:1":
+            width, height = 1024, 1024
+
+        image_api_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&seed={uuid.uuid4().int % 1000000}&model=flux&nologo=true"
+        
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            image_resp = await client.get(image_api_url)
+            if image_resp.status_code != 200:
+                raise HTTPException(status_code=500, detail="Failed to render image from prompt")
             
+            img_bytes = image_resp.content
+            if len(img_bytes) < 5000: # Less than 5KB is likely an error or empty
+                 logger.error(f"Pollinations returned suspiciously small file: {len(img_bytes)} bytes")
+                 raise HTTPException(status_code=500, detail="AI generator returned a broken image. Please try a different description.")
+                 
+            img_data_b64 = base64.b64encode(img_bytes).decode("utf-8")
+            
+        # 1. Deduct Credit
         await db.users.update_one({"user_id": user["user_id"]}, {"$inc": {"credits": -1}})
         
-        img_data_b64 = images[0]['data'] 
-        img_bytes = base64.b64decode(img_data_b64)
-        
-        filename = f"{uuid.uuid4()}.png"
-        filepath = os.path.join("static/images", filename)
-        
-        async with aiofiles.open(filepath, "wb") as f:
-            await f.write(img_bytes)
-            
-        image_url = f"/api/static/images/{filename}"
-        
+        # 2. Use the direct Pollinations URL as the permanent link
+        # This avoids needing Cloudinary or local storage on ephemeral servers like Render
+        image_url = image_api_url
+
+        # 3. Save to DB
         thumb_id = str(uuid.uuid4())
         thumbnail = {
             "id": thumb_id,
@@ -258,12 +361,12 @@ async def generate_thumbnail(req: GenerateRequest, request: Request, user: dict 
             "description": req.description,
             "thumbnail_text": req.thumbnail_text,
             "aspect_ratio": req.aspect_ratio,
-            "image_url": image_url,
+            "image_url": image_url, # Points to Pollinations directly
             "created_at": datetime.now(timezone.utc),
         }
         await db.thumbnails.insert_one(thumbnail)
         
-        return {"image": f"data:image/png;base64,{img_data_b64}", "credits": user["credits"] - 1}
+        return {"image": f"data:image/png;base64,{img_data_b64}", "credits": user["credits"] - 1, "image_url": image_url}
         
     except Exception as e:
         logger.error(f"Generation error: {e}")
@@ -281,9 +384,6 @@ PACKS = {
 async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get_current_user)):
     frontend_url = os.getenv('FRONTEND_URL')
     if not frontend_url:
-        # Fallback only if absolutely necessary, but better to fail in prod if config is missing
-        # However, for this environment where I just added it, it should be fine.
-        # Let's trust the env var.
         raise HTTPException(status_code=500, detail="FRONTEND_URL not configured")
         
     success_url = f"{frontend_url}/dashboard?payment=success"
@@ -292,7 +392,6 @@ async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get
     if not pack:
         raise HTTPException(status_code=400, detail="Invalid pack ID")
 
-    # In production, use real Stripe. Here, handle both.
     if STRIPE_KEY and not STRIPE_KEY.startswith("sk_test_4eC39"): 
         try:
             checkout_session = stripe.checkout.Session.create(

@@ -5,9 +5,11 @@ import { Toaster } from './components/ui/sonner';
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import Editor from './pages/Editor';
-import AuthCallback from './pages/AuthCallback';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
 import Pricing from './pages/Pricing';
+import Showcase from './pages/Showcase';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -20,33 +22,29 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function AppContent() {
-    const location = useLocation();
-    // Check URL fragment for session_id to prevent race conditions
-    if (location.hash?.includes('session_id=')) {
-        return <AuthCallback />;
-    }
-
-    return (
-        <div className="min-h-screen bg-[#FAFAFA] text-[#111111] font-sans antialiased">
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/editor" element={
-              <ProtectedRoute>
-                <Editor />
-              </ProtectedRoute>
-            } />
-          </Routes>
-          <Toaster />
-        </div>
-    );
+  return (
+    <div className="min-h-screen bg-[#FAFAFA] text-[#111111] font-sans antialiased">
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/showcase" element={<Showcase />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/editor" element={
+          <ProtectedRoute>
+            <Editor />
+          </ProtectedRoute>
+        } />
+      </Routes>
+      <Toaster />
+    </div>
+  );
 }
 
 function App() {

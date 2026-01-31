@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -27,9 +27,46 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = () => {
-    const redirectUrl = window.location.origin + '/auth/callback'; 
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+  const handleError = (error, defaultMsg) => {
+    const detail = error.response?.data?.detail;
+    if (typeof detail === 'string') {
+      toast.error(detail);
+    } else if (Array.isArray(detail)) {
+      // Handle Pydantic validation errors (FastAPI 422)
+      // Extract the human-readable part of the error
+      const msg = detail[0]?.msg || defaultMsg;
+      toast.error(msg);
+    } else {
+      toast.error(defaultMsg);
+    }
+  };
+
+  const login = async (email, password) => {
+    try {
+      const { data } = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
+        email, password
+      }, { withCredentials: true });
+      setUser(data.user);
+      toast.success('Logged in successfully');
+      return true;
+    } catch (error) {
+      handleError(error, 'Login failed');
+      return false;
+    }
+  };
+
+  const signup = async (email, password, name) => {
+    try {
+      const { data } = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/signup`, {
+        email, password, name
+      }, { withCredentials: true });
+      setUser(data.user);
+      toast.success('Account created successfully');
+      return true;
+    } catch (error) {
+      handleError(error, 'Signup failed');
+      return false;
+    }
   };
 
   const logout = async () => {
@@ -43,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, checkAuth, setUser }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, loading, checkAuth, setUser }}>
       {children}
     </AuthContext.Provider>
   );
