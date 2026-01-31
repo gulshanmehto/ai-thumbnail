@@ -111,14 +111,27 @@ export default function AdminDashboard() {
     useEffect(() => {
         const checkAuth = async () => {
             try {
+                const token = getAuthHeaders()['X-Admin-Token'];
+                console.log("Checking Admin Auth with Token:", token ? token.substring(0, 10) + '...' : 'NONE');
+
+                if (!token) {
+                    console.warn("No admin token found in localStorage");
+                    navigate('/admin/login');
+                    return;
+                }
+
                 await axios.get(`${API_URL}/admin/check`, {
                     withCredentials: true,
                     headers: getAuthHeaders()
                 });
+                console.log("Admin Auth Success");
                 loadStats();
                 loadDiscounts();
             } catch (err) {
-                navigate('/admin/login');
+                console.error("Admin Auth Check Failed:", err);
+                console.error("Error Response:", err.response);
+                // navigate('/admin/login'); // Auto-redirect disabled for debugging
+                toast.error(`Session Error: ${err.message}. Check console.`);
             }
         };
         checkAuth();
