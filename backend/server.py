@@ -295,7 +295,7 @@ async def generate_thumbnail(req: GenerateRequest, request: Request, user: dict 
         reference_b64 = await fetch_image_b64(req.reference_image)
 
         # Initialize Model
-        model = genai.GenerativeModel('gemini-flash-latest')
+        model = genai.GenerativeModel('gemini-2.5-flash-image')
         
         # Analyze subject and reference to create a perfect prompt
         analysis_prompt = f"""
