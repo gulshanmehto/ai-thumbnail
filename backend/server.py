@@ -82,7 +82,7 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["Authorization", "Content-Type", "X-Admin-Token", "Set-Cookie", "Cookie"], # Explicitly allow our custom header
 )
 
 # DB
@@ -533,24 +533,35 @@ class DiscountCode(BaseModel):
 
 async def get_admin_user(request: Request):
     """Verify admin session"""
-    session_id = request.cookies.get("admin_session")
-    if not session_id:
-        # Fallback to header for cross-domain usage
-        session_id = request.headers.get("X-Admin-Token")
+    try:
+        session_id = request.cookies.get("admin_session")
+        if not session_id:
+            # Fallback to header for cross-domain usage
+            session_id = request.headers.get("X-Admin-Token")
+            
+        if not session_id:
+            raise HTTPException(status_code=401, detail="Admin authentication required (No Token)")
         
-    if not session_id:
-        raise HTTPException(status_code=401, detail="Admin authentication required")
-    
-    session = await db.admin_sessions.find_one({"session_id": session_id})
-    if not session:
-        raise HTTPException(status_code=401, detail="Invalid admin session")
-    
-    # Check if session expired (24 hours)
-    if datetime.now(timezone.utc) - session["created_at"] > timedelta(hours=24):
-        await db.admin_sessions.delete_one({"session_id": session_id})
-        raise HTTPException(status_code=401, detail="Session expired")
-    
-    return session
+        session = await db.admin_sessions.find_one({"session_id": session_id})
+        if not session:
+            logger.warning(f"Invalid Admin Session ID: {session_id}")
+            raise HTTPException(status_code=401, detail="Invalid admin session")
+        
+        # Check if session expired (24 hours)
+        if datetime.now(timezone.utc) - session["created_at"] > timedelta(hours=24):
+            await db.admin_sessions.delete_one({"session_id": session_id})
+            logger.warning(f"Expired Admin Session ID: {session_id}")
+            raise HTTPException(status_code=401, detail="Session expired")
+        
+        # Convert to plain dict to avoid Pydantic issues
+        session["_id"] = str(session["_id"]) 
+        return session
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Auth Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Auth Error: {str(e)}")
 
 @api_router.post("/admin/login")
 async def admin_login(req: AdminLoginRequest, response: Response):
