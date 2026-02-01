@@ -612,6 +612,153 @@ class DiscountCode(BaseModel):
     max_uses: Optional[int] = None
     valid_until: Optional[datetime] = None
     description: Optional[str] = None
+    valid_plans: Optional[List[str]] = None  # e.g., ["starter", "creator", "pro"]
+    valid_billing: Optional[List[str]] = None # e.g., ["monthly", "annual"]
+
+# Define pricing packs
+# Format: pack_<plan>_<billing>
+PACKS = {
+    # Monthly
+    "pack_starter_monthly": {"amount": 999, "credits": 50, "name": "Starter Plan (Monthly)", "plan": "starter", "billing": "monthly"},
+    "pack_creator_monthly": {"amount": 2499, "credits": 150, "name": "Creator Plan (Monthly)", "plan": "creator", "billing": "monthly"},
+    "pack_pro_monthly": {"amount": 4999, "credits": 400, "name": "Pro Plan (Monthly)", "plan": "pro", "billing": "monthly"},
+    
+    # Annual (Discounted Bulk)
+    "pack_starter_annual": {"amount": 7188, "credits": 600, "name": "Starter Plan (Annual)", "plan": "starter", "billing": "annual"},
+    "pack_creator_annual": {"amount": 17988, "credits": 1800, "name": "Creator Plan (Annual)", "plan": "creator", "billing": "annual"},
+    "pack_pro_annual": {"amount": 35988, "credits": 4800, "name": "Pro Plan (Annual)", "plan": "pro", "billing": "annual"},
+    
+    # Legacy fallbacks (optional, mapping to monthly)
+    "pack_starter": {"amount": 999, "credits": 50, "name": "Starter Plan", "plan": "starter", "billing": "monthly"},
+    "pack_creator": {"amount": 2499, "credits": 150, "name": "Creator Plan", "plan": "creator", "billing": "monthly"},
+    "pack_pro": {"amount": 4999, "credits": 400, "name": "Pro Plan", "plan": "pro", "billing": "monthly"}
+}
+
+@api_router.post("/apply-coupon")
+async def apply_coupon(req: ApplyCouponRequest):
+    code = req.code.strip().upper()
+    discount = await db.discount_codes.find_one({"code": code, "is_active": True})
+    
+    if not discount:
+        raise HTTPException(status_code=404, detail="Invalid coupon code")
+        
+    if discount.get("valid_until"):
+        valid_until = discount["valid_until"]
+        if valid_until.tzinfo is None:
+            valid_until = valid_until.replace(tzinfo=timezone.utc)
+        if valid_until < datetime.now(timezone.utc):
+            raise HTTPException(status_code=400, detail="Coupon expired")
+        
+    if discount.get("max_uses") and discount.get("uses", 0) >= discount["max_uses"]:
+        raise HTTPException(status_code=400, detail="Coupon usage limit reached")
+
+    return {
+        "valid": True,
+        "discount_percent": discount["discount_percent"],
+        "code": code,
+        "valid_plans": discount.get("valid_plans", []),
+        "valid_billing": discount.get("valid_billing", [])
+    }
+
+@api_router.post("/create-checkout-session")
+async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get_current_user)):
+    frontend_url = os.getenv('FRONTEND_URL', "http://localhost:3000")
+    
+    pack = PACKS.get(req.pack_id)
+    if not pack:
+        raise HTTPException(status_code=400, detail="Invalid pack ID")
+
+    amount = float(pack["amount"])
+    
+    # Apply Coupon if provided
+    if req.coupon_code:
+        code = req.coupon_code.strip().upper()
+        discount = await db.discount_codes.find_one({"code": code, "is_active": True})
+        
+        if discount:
+            # Check validity
+            is_valid = True
+            
+            # 1. Check Date
+            if discount.get("valid_until"):
+                valid_until = discount["valid_until"]
+                if valid_until.tzinfo is None:
+                    valid_until = valid_until.replace(tzinfo=timezone.utc)
+                if valid_until < datetime.now(timezone.utc):
+                    is_valid = False
+            
+            # 2. Check Usage Limit
+            if discount.get("max_uses") and discount.get("uses", 0) >= discount["max_uses"]:
+                is_valid = False
+                
+            # 3. Check Plan Restriction
+            if is_valid and discount.get("valid_plans"):
+                if pack.get("plan") not in discount["valid_plans"]:
+                    is_valid = False
+
+            # 4. Check Billing Restriction
+            if is_valid and discount.get("valid_billing"):
+                if pack.get("billing") not in discount["valid_billing"]:
+                    is_valid = False
+                
+            if is_valid:
+                discount_amount = (amount * discount["discount_percent"]) / 100
+                amount = amount - discount_amount
+                if amount < 0: amount = 0
+
+    if not PAYU_KEY or not PAYU_SALT:
+        # Fallback for testing/dev: Immediately grant credits
+        logger.warning("PayU Keys missing. Auto-granting credits for demo mode.")
+        await db.users.update_one({"user_id": user["user_id"]}, {"$inc": {"credits": pack["credits"]}})
+        return {"url": f"{frontend_url}/dashboard?payment=success&credits={pack['credits']}", "is_mock": True}
+
+    txnid = f"tx_{uuid.uuid4().hex[:10]}"
+    amount_str = "{:.2f}".format(amount)
+    productinfo = pack["name"]
+    firstname = user.get("name", "User").split()[0]
+    email = user["email"]
+    udf1 = user["user_id"]
+    udf2 = req.pack_id
+    udf3 = req.coupon_code if req.coupon_code else ""
+    
+    # Hash Order: key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5|udf6|udf7|udf8|udf9|udf10|SALT
+    hash_params = [
+        PAYU_KEY,
+        txnid,
+        amount_str,
+        productinfo,
+        firstname,
+        email,
+        udf1,
+        udf2,
+        udf3, "", "", "", "", "", "", "", # udf3 is coupon code
+        PAYU_SALT
+    ]
+    hash_str = "|".join(hash_params)
+    payu_hash = hashlib.sha512(hash_str.encode()).hexdigest()
+
+    backend_url = os.getenv('BACKEND_URL', "https://ai-thumbnail-50sc.onrender.com")
+    return {
+        "payu_url": PAYU_URL,
+        "params": {
+            "key": PAYU_KEY,
+            "txnid": txnid,
+            "amount": amount_str,
+            "productinfo": productinfo,
+            "firstname": firstname,
+            "email": email,
+            "phone": "9999999999",
+            "surl": f"{backend_url}/api/payu/success",
+            "furl": f"{backend_url}/api/payu/failure",
+            "hash": payu_hash,
+            "service_provider": "payu_paisa",
+            "udf1": user["user_id"],
+            "udf2": req.pack_id,
+            "udf3": udf3,
+            "udf4": "",
+            "udf5": ""
+        }
+    }
 
 async def get_admin_user(request: Request):
     """Verify admin session"""

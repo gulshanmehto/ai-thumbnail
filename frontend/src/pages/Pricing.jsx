@@ -31,11 +31,14 @@ export default function Pricing() {
         }
     };
 
-    const handleSubscribe = async (packId) => {
+    const handleSubscribe = async (planKey) => {
         if (!user) {
             navigate('/login');
             return;
         }
+
+        const billingCycle = isAnnual ? 'annual' : 'monthly';
+        const packId = `pack_${planKey}_${billingCycle}`;
 
         try {
             const { data } = await axios.post(
@@ -71,9 +74,25 @@ export default function Pricing() {
         }
     };
 
-    const getDiscountedPrice = (priceStr) => {
-        if (!activeCoupon) return priceStr;
-        const num = parseInt(priceStr.replace(/[^\d]/g, ''));
+    const getDiscountedPrice = (originalPrice, planKey) => {
+        if (!activeCoupon) return originalPrice;
+
+        // Check Plan Restriction
+        if (activeCoupon.valid_plans && activeCoupon.valid_plans.length > 0) {
+            if (!activeCoupon.valid_plans.includes(planKey)) {
+                return originalPrice;
+            }
+        }
+
+        // Check Billing Restriction
+        const currentBilling = isAnnual ? 'annual' : 'monthly';
+        if (activeCoupon.valid_billing && activeCoupon.valid_billing.length > 0) {
+            if (!activeCoupon.valid_billing.includes(currentBilling)) {
+                return originalPrice;
+            }
+        }
+
+        const num = parseInt(originalPrice.replace(/[^\d]/g, ''));
         const discounted = Math.round(num * (1 - activeCoupon.discount_percent / 100));
         return `₹${discounted.toLocaleString('en-IN')}`;
     };
@@ -81,6 +100,7 @@ export default function Pricing() {
     const plans = [
         {
             name: 'Free',
+            key: 'free',
             description: 'For trying out the platform',
             price: { monthly: '₹0', annual: '₹0' },
             credits: '3 credits',
@@ -98,6 +118,7 @@ export default function Pricing() {
         },
         {
             name: 'Starter',
+            key: 'starter',
             description: 'For individual creators',
             price: { monthly: '₹999', annual: '₹599' },
             credits: '50 credits',
@@ -109,12 +130,13 @@ export default function Pricing() {
                 { text: 'Email Support', included: true },
             ],
             cta: 'Get Starter',
-            ctaAction: () => handleSubscribe('pack_starter'),
+            ctaAction: () => handleSubscribe('starter'),
             popular: false,
             gradient: false,
         },
         {
             name: 'Creator',
+            key: 'creator',
             description: 'Most popular for YouTubers',
             price: { monthly: '₹2,499', annual: '₹1,499' },
             credits: '150 credits',
@@ -126,12 +148,13 @@ export default function Pricing() {
                 { text: 'Bulk Generation', included: true },
             ],
             cta: 'Get Creator',
-            ctaAction: () => handleSubscribe('pack_creator'),
+            ctaAction: () => handleSubscribe('creator'),
             popular: true,
             gradient: true,
         },
         {
             name: 'Pro',
+            key: 'pro',
             description: 'For agencies & power users',
             price: { monthly: '₹4,999', annual: '₹2,999' },
             credits: '400 credits',
@@ -143,7 +166,7 @@ export default function Pricing() {
                 { text: 'Dedicated Support', included: true },
             ],
             cta: 'Get Pro',
-            ctaAction: () => handleSubscribe('pack_pro'),
+            ctaAction: () => handleSubscribe('pro'),
             popular: false,
             gradient: false,
         },

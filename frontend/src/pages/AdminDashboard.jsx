@@ -357,39 +357,67 @@ export default function AdminDashboard() {
                                                     <p className="text-gray-500 text-sm">{user.email}</p>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-1">
                                                         <span className={`px-2 py-1 rounded text-sm font-medium ${user.credits > 5 ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
                                                             }`}>
                                                             {user.credits}
                                                         </span>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            className="h-6 w-6 p-0 rounded-full hover:bg-gray-700 text-gray-400 hover:text-green-400"
-                                                            title="Add Credits"
-                                                            onClick={async () => {
-                                                                const amount = window.prompt(`Add credits for ${user.name}:`, "10");
-                                                                if (amount && !isNaN(amount)) {
-                                                                    try {
-                                                                        await axios.post(`${API_URL}/admin/user/${user.user_id}/add-credits`,
-                                                                            null,
-                                                                            {
-                                                                                params: { credits: parseInt(amount) },
-                                                                                withCredentials: true,
-                                                                                headers: getAuthHeaders()
-                                                                            }
-                                                                        );
-                                                                        toast.success(`Added ${amount} credits to ${user.name}`);
-                                                                        loadUsers(userPage, searchQuery);
-                                                                    } catch (err) {
-                                                                        console.error(err);
-                                                                        toast.error("Failed to add credits");
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-5 w-5 p-0 rounded-full hover:bg-gray-700 text-gray-400 hover:text-green-400"
+                                                                title="Add Credits"
+                                                                onClick={async () => {
+                                                                    const amount = window.prompt(`Add credits for ${user.name}:`, "10");
+                                                                    if (amount && !isNaN(amount)) {
+                                                                        try {
+                                                                            await axios.post(`${API_URL}/admin/user/${user.user_id}/add-credits`,
+                                                                                null,
+                                                                                {
+                                                                                    params: { credits: parseInt(amount) },
+                                                                                    withCredentials: true,
+                                                                                    headers: getAuthHeaders()
+                                                                                }
+                                                                            );
+                                                                            toast.success(`Added ${amount} credits`);
+                                                                            loadUsers(userPage, searchQuery);
+                                                                        } catch (err) {
+                                                                            toast.error("Failed");
+                                                                        }
                                                                     }
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Plus className="w-3 h-3" />
-                                                        </Button>
+                                                                }}
+                                                            >
+                                                                <Plus className="w-3 h-3" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-5 w-5 p-0 rounded-full hover:bg-gray-700 text-gray-400 hover:text-red-400"
+                                                                title="Remove Credits"
+                                                                onClick={async () => {
+                                                                    const amount = window.prompt(`Remove credits from ${user.name}:`, "10");
+                                                                    if (amount && !isNaN(amount)) {
+                                                                        try {
+                                                                            await axios.post(`${API_URL}/admin/user/${user.user_id}/add-credits`,
+                                                                                null,
+                                                                                {
+                                                                                    params: { credits: -parseInt(amount) },
+                                                                                    withCredentials: true,
+                                                                                    headers: getAuthHeaders()
+                                                                                }
+                                                                            );
+                                                                            toast.success(`Removed ${amount} credits`);
+                                                                            loadUsers(userPage, searchQuery);
+                                                                        } catch (err) {
+                                                                            toast.error("Failed");
+                                                                        }
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Trash2 className="w-3 h-3" />
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-gray-300">{user.thumbnail_count}</td>
@@ -444,7 +472,7 @@ export default function AdminDashboard() {
                                 <Plus className="w-5 h-5" />
                                 Create New Discount
                             </h3>
-                            <form onSubmit={createDiscount} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <form onSubmit={createDiscount} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <div>
                                     <Label className="text-gray-300">Code</Label>
                                     <Input
@@ -478,10 +506,59 @@ export default function AdminDashboard() {
                                         className="bg-[#111827] border-gray-600 text-white mt-1"
                                     />
                                 </div>
-                                <div className="flex items-end">
-                                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
+
+                                {/* Plan Restrictions */}
+                                <div className="md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-700 pt-4 mt-2">
+                                    <div>
+                                        <Label className="text-gray-300 mb-2 block">Valid Plans (Optional - select to restrict)</Label>
+                                        <div className="flex flex-wrap gap-3">
+                                            {['starter', 'creator', 'pro'].map(plan => (
+                                                <label key={plan} className="flex items-center gap-2 text-gray-400 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={newDiscount.valid_plans?.includes(plan)}
+                                                        onChange={(e) => {
+                                                            const current = newDiscount.valid_plans || [];
+                                                            const next = e.target.checked
+                                                                ? [...current, plan]
+                                                                : current.filter(p => p !== plan);
+                                                            setNewDiscount({ ...newDiscount, valid_plans: next });
+                                                        }}
+                                                        className="rounded bg-gray-800 border-gray-600 text-red-500 focus:ring-red-500"
+                                                    />
+                                                    <span className="capitalize">{plan}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label className="text-gray-300 mb-2 block">Valid Billing (Optional)</Label>
+                                        <div className="flex flex-wrap gap-3">
+                                            {['monthly', 'annual'].map(cycle => (
+                                                <label key={cycle} className="flex items-center gap-2 text-gray-400 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={newDiscount.valid_billing?.includes(cycle)}
+                                                        onChange={(e) => {
+                                                            const current = newDiscount.valid_billing || [];
+                                                            const next = e.target.checked
+                                                                ? [...current, cycle]
+                                                                : current.filter(c => c !== cycle);
+                                                            setNewDiscount({ ...newDiscount, valid_billing: next });
+                                                        }}
+                                                        className="rounded bg-gray-800 border-gray-600 text-red-500 focus:ring-red-500"
+                                                    />
+                                                    <span className="capitalize">{cycle}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="md:col-span-2 lg:col-span-4 flex justify-end mt-2">
+                                    <Button type="submit" className="bg-green-600 hover:bg-green-700 px-8">
                                         <Plus className="w-4 h-4 mr-2" />
-                                        Create Code
+                                        Create Coupon Code
                                     </Button>
                                 </div>
                             </form>
