@@ -300,7 +300,7 @@ Make it eye-catching, high contrast, and professional.
         # Generate
         response = await asyncio.to_thread(
             client.models.generate_content,
-            model="gemini-2.0-flash-exp-image-generation",
+            model="gemini-3-pro-image-preview",
             contents=contents_payload,
             config=types.GenerateContentConfig(response_modalities=['Image', 'Text'])
         )
