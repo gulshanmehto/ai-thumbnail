@@ -139,7 +139,104 @@ EXPRESSION_PROMPTS = {
     "extreme": "Shocked face, jaw drop, eyes popping out, extreme contouring, high contrast lighting, exaggerated reaction"
 }
 
-# ... [Intermediate code unchanged] ...
+# --- AUTHENTICATION MODULES (Restored) ---
+
+class SignupRequest(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+async def get_current_user(request: Request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        # Check cookie as fallback
+        cookie_token = request.cookies.get("session_token")
+        if cookie_token:
+            auth_header = f"Bearer {cookie_token}"
+        else:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    token = auth_header.split(" ")[1] if auth_header.startswith("Bearer ") else auth_header
+    
+    session = await db.sessions.find_one({"session_token": token})
+    if not session:
+        raise HTTPException(status_code=401, detail="Invalid session")
+        
+    user = await db.users.find_one({"user_id": session["user_id"]})
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+        
+    return user
+
+@api_router.post("/auth/signup")
+async def signup(req: SignupRequest):
+    if await db.users.find_one({"email": req.email}):
+        raise HTTPException(status_code=400, detail="Email already registered")
+        
+    user_id = str(uuid.uuid4())
+    hashed = get_password_hash(req.password)
+    
+    user_doc = {
+        "user_id": user_id,
+        "email": req.email,
+        "name": req.name,
+        "password": hashed,
+        "credits": 5,
+        "created_at": datetime.now(timezone.utc),
+        "picture": f"https://api.dicebear.com/7.x/avataaars/svg?seed={req.name}"
+    }
+    await db.users.insert_one(user_doc)
+    
+    token = str(uuid.uuid4())
+    await db.sessions.insert_one({
+        "session_token": token,
+        "user_id": user_id,
+        "created_at": datetime.now(timezone.utc)
+    })
+    
+    u_resp = user_doc.copy()
+    if "password" in u_resp: del u_resp["password"]
+    if "_id" in u_resp: u_resp["_id"] = str(u_resp["_id"])
+    
+    return {"session_token": token, "user": u_resp}
+
+@api_router.post("/auth/login")
+async def login(req: LoginRequest):
+    user = await db.users.find_one({"email": req.email})
+    if not user or not verify_password(req.password, user["password"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+    token = str(uuid.uuid4())
+    await db.sessions.insert_one({
+        "session_token": token,
+        "user_id": user["user_id"],
+        "created_at": datetime.now(timezone.utc)
+    })
+    
+    u_resp = user.copy()
+    if "password" in u_resp: del u_resp["password"]
+    if "_id" in u_resp: u_resp["_id"] = str(u_resp["_id"])
+    
+    return {"session_token": token, "user": u_resp}
+
+@api_router.get("/auth/me")
+async def get_me(user: dict = Depends(get_current_user)):
+    u_resp = user.copy()
+    if "password" in u_resp: del u_resp["password"]
+    if "_id" in u_resp: u_resp["_id"] = str(u_resp["_id"])
+    return u_resp
+
+@api_router.post("/auth/logout")
+async def logout(request: Request):
+    auth_header = request.headers.get("Authorization")
+    if auth_header and "Bearer " in auth_header:
+        token = auth_header.split(" ")[1]
+        await db.sessions.delete_one({"session_token": token})
+    return {"status": "ok"}
 
 @api_router.post("/generate")
 async def generate_thumbnail(req: GenerateRequest, request: Request, user: dict = Depends(get_current_user)):
