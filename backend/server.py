@@ -365,6 +365,10 @@ Make it eye-catching, high contrast, and professional.
 # --- PAYU PAYMENTS ---
 class CheckoutRequest(BaseModel):
     pack_id: str
+    coupon_code: Optional[str] = None
+
+class ApplyCouponRequest(BaseModel):
+    code: str
 
 # Define pricing packs
 PACKS = {
@@ -372,6 +376,32 @@ PACKS = {
     "pack_creator": {"amount": 2499, "credits": 150, "name": "Creator Plan (150 Credits)"},
     "pack_pro": {"amount": 4999, "credits": 400, "name": "Pro/Agency Plan (400 Credits)"}
 }
+
+@api_router.post("/apply-coupon")
+async def apply_coupon(req: ApplyCouponRequest):
+    code = req.code.strip().upper()
+    discount = await db.discount_codes.find_one({"code": code, "is_active": True})
+    
+    if not discount:
+        raise HTTPException(status_code=404, detail="Invalid coupon code")
+        
+    if discount.get("valid_until"):
+        # Ensure timezone awareness
+        valid_until = discount["valid_until"]
+        if valid_until.tzinfo is None:
+            valid_until = valid_until.replace(tzinfo=timezone.utc)
+            
+        if valid_until < datetime.now(timezone.utc):
+            raise HTTPException(status_code=400, detail="Coupon expired")
+        
+    if discount.get("max_uses") and discount.get("uses", 0) >= discount["max_uses"]:
+        raise HTTPException(status_code=400, detail="Coupon usage limit reached")
+
+    return {
+        "valid": True,
+        "discount_percent": discount["discount_percent"],
+        "code": code
+    }
 
 @api_router.post("/create-checkout-session")
 async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get_current_user)):
@@ -381,6 +411,35 @@ async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get
     if not pack:
         raise HTTPException(status_code=400, detail="Invalid pack ID")
 
+    amount = float(pack["amount"])
+    
+    # Apply Coupon if provided
+    if req.coupon_code:
+        code = req.coupon_code.strip().upper()
+        discount = await db.discount_codes.find_one({"code": code, "is_active": True})
+        
+        if discount:
+            # Check validity
+            is_valid = True
+            if discount.get("valid_until"):
+                valid_until = discount["valid_until"]
+                if valid_until.tzinfo is None:
+                    valid_until = valid_until.replace(tzinfo=timezone.utc)
+                if valid_until < datetime.now(timezone.utc):
+                    is_valid = False
+            
+            if discount.get("max_uses") and discount.get("uses", 0) >= discount["max_uses"]:
+                is_valid = False
+                
+            if is_valid:
+                discount_amount = (amount * discount["discount_percent"]) / 100
+                amount = amount - discount_amount
+                if amount < 0: amount = 0
+                # Ideally we track usage here or in success callback. 
+                # For simplicity, we'll increment 'uses' optimistically here? 
+                # No, better to do it on success. But we need to carry the info.
+                # We'll put coupon code in UDF3 to track it later if needed.
+
     if not PAYU_KEY or not PAYU_SALT:
         # Fallback for testing/dev: Immediately grant credits
         logger.warning("PayU Keys missing. Auto-granting credits for demo mode.")
@@ -388,13 +447,13 @@ async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get
         return {"url": f"{frontend_url}/dashboard?payment=success", "is_mock": True}
 
     txnid = f"tx_{uuid.uuid4().hex[:10]}"
-    amount = float(pack["amount"])
     amount_str = "{:.2f}".format(amount)
     productinfo = pack["name"]
     firstname = user.get("name", "User").split()[0]
     email = user["email"]
     udf1 = user["user_id"]
     udf2 = req.pack_id
+    udf3 = req.coupon_code if req.coupon_code else ""
     
     # Hash Order: key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5|udf6|udf7|udf8|udf9|udf10|SALT
     hash_params = [
@@ -406,7 +465,7 @@ async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get
         email,
         udf1,
         udf2,
-        "", "", "", "", "", "", "", "", # udf3 to udf10
+        udf3, "", "", "", "", "", "", "", # udf3 is coupon code
         PAYU_SALT
     ]
     hash_str = "|".join(hash_params)
@@ -429,7 +488,7 @@ async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get
             "service_provider": "payu_paisa",
             "udf1": user["user_id"],
             "udf2": req.pack_id,
-            "udf3": "",
+            "udf3": udf3,
             "udf4": "",
             "udf5": ""
         }

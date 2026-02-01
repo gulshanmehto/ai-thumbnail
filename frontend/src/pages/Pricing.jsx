@@ -9,6 +9,25 @@ import { BACKEND_URL } from '../lib/config';
 export default function Pricing() {
     const { user, login } = useAuth();
     const [isAnnual, setIsAnnual] = React.useState(true);
+    const [couponCode, setCouponCode] = React.useState('');
+    const [couponLoading, setCouponLoading] = React.useState(false);
+    const [activeCoupon, setActiveCoupon] = React.useState(null);
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode.trim()) return;
+        setCouponLoading(true);
+        try {
+            const { data } = await axios.post(`${BACKEND_URL}/api/apply-coupon`, { code: couponCode });
+            setActiveCoupon(data);
+            toast.success(`Coupon ${data.code} applied! ${data.discount_percent}% OFF`);
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.detail || "Invalid coupon code");
+            setActiveCoupon(null);
+        } finally {
+            setCouponLoading(false);
+        }
+    };
 
     const handleSubscribe = async (packId) => {
         if (!user) {
@@ -19,7 +38,10 @@ export default function Pricing() {
         try {
             const { data } = await axios.post(
                 `${BACKEND_URL}/api/create-checkout-session`,
-                { pack_id: packId },
+                {
+                    pack_id: packId,
+                    coupon_code: activeCoupon ? activeCoupon.code : null
+                },
                 { withCredentials: true }
             );
 
@@ -45,6 +67,13 @@ export default function Pricing() {
             console.error(error);
             toast.error("Failed to start checkout");
         }
+    };
+
+    const getDiscountedPrice = (priceStr) => {
+        if (!activeCoupon) return priceStr;
+        const num = parseInt(priceStr.replace(/[^\d]/g, ''));
+        const discounted = Math.round(num * (1 - activeCoupon.discount_percent / 100));
+        return `₹${discounted.toLocaleString('en-IN')}`;
     };
 
     const plans = [
@@ -135,7 +164,7 @@ export default function Pricing() {
                     </p>
 
                     {/* Toggle */}
-                    <div className="flex items-center justify-center gap-4 mt-10">
+                    <div className="flex items-center justify-center gap-4 mt-8">
                         <span className={`text-sm font-semibold ${!isAnnual ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>Monthly</span>
                         <button
                             onClick={() => setIsAnnual(!isAnnual)}
@@ -149,6 +178,38 @@ export default function Pricing() {
                                 Save 40%
                             </span>
                         </div>
+                    </div>
+
+                    {/* Coupon Code Section */}
+                    <div className="flex items-center justify-center gap-2 mt-8 max-w-sm mx-auto">
+                        {!activeCoupon ? (
+                            <>
+                                <input
+                                    type="text"
+                                    placeholder="Have a coupon code?"
+                                    value={couponCode}
+                                    onChange={(e) => setCouponCode(e.target.value)}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#111827] bg-white"
+                                />
+                                <Button
+                                    onClick={handleApplyCoupon}
+                                    disabled={couponLoading || !couponCode}
+                                    className="bg-[#111827] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
+                                >
+                                    {couponLoading ? '...' : 'Apply'}
+                                </Button>
+                            </>
+                        ) : (
+                            <div className="flex items-center gap-3 bg-green-50 text-green-700 px-4 py-2 rounded-lg border border-green-200">
+                                <span className="text-sm font-medium">Coupon <strong>{activeCoupon.code}</strong> applied! ({activeCoupon.discount_percent}% OFF)</span>
+                                <button
+                                    onClick={() => { setActiveCoupon(null); setCouponCode(''); }}
+                                    className="text-xs hover:text-green-900 border-l border-green-200 pl-3 font-bold"
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -179,10 +240,18 @@ export default function Pricing() {
 
                             {/* Price */}
                             <div className="mb-6">
-                                <div className="flex items-baseline gap-1">
+                                <div className="flex items-baseline gap-1 flex-wrap">
                                     <span className={`text-4xl font-extrabold ${plan.popular ? 'text-gradient' : 'text-[#111827]'}`}>
-                                        {isAnnual ? plan.price.annual : plan.price.monthly}
+                                        {activeCoupon && plan.name !== 'Free'
+                                            ? getDiscountedPrice(isAnnual ? plan.price.annual : plan.price.monthly)
+                                            : (isAnnual ? plan.price.annual : plan.price.monthly)
+                                        }
                                     </span>
+                                    {activeCoupon && plan.name !== 'Free' && (
+                                        <span className="text-sm text-gray-400 line-through decoration-red-500">
+                                            {isAnnual ? plan.price.annual : plan.price.monthly}
+                                        </span>
+                                    )}
                                     {plan.name !== 'Free' && (
                                         <span className="text-[#9CA3AF] text-sm">/{isAnnual ? 'year' : 'month'}</span>
                                     )}
