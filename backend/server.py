@@ -497,13 +497,97 @@ async def create_checkout_session(req: CheckoutRequest, user: dict = Depends(get
 @api_router.post("/payu/success")
 async def payu_success(request: Request):
     form_data = await request.form()
-    # Verify Hash for security (Omitted for brevity - recommended in prod)
-    # status = form_data.get("status")
-    # txnid = form_data.get("txnid")
-    # ... logic to find user/pack and update credits ...
+    
+    # Extract Data
+    status = form_data.get("status")
+    txnid = form_data.get("txnid")
+    amount = form_data.get("amount")
+    productinfo = form_data.get("productinfo")
+    firstname = form_data.get("firstname")
+    email = form_data.get("email")
+    udf1 = form_data.get("udf1") # user_id
+    udf2 = form_data.get("udf2") # pack_id
+    udf3 = form_data.get("udf3") # coupon_code
+    udf4 = form_data.get("udf4")
+    udf5 = form_data.get("udf5")
+    udf6 = form_data.get("udf6")
+    udf7 = form_data.get("udf7")
+    udf8 = form_data.get("udf8")
+    udf9 = form_data.get("udf9")
+    udf10 = form_data.get("udf10")
+    posted_hash = form_data.get("hash")
+    
+    # Verify Hash
+    # Hash Order for response: SALT|status||||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key
+    retrieved_hash_params = [
+        PAYU_SALT,
+        status,
+        udf10 or "", udf9 or "", udf8 or "", udf7 or "", udf6 or "", udf5 or "", udf4 or "", udf3 or "", udf2 or "", udf1 or "",
+        email,
+        firstname,
+        productinfo,
+        amount,
+        txnid,
+        PAYU_KEY
+    ]
+    retrieved_hash_str = "|".join(retrieved_hash_params)
+    calculated_hash = hashlib.sha512(retrieved_hash_str.encode()).hexdigest()
     
     frontend_url = os.getenv('FRONTEND_URL', "http://localhost:3000")
-    return Response(content=f"<html><script>window.location.href='{frontend_url}/dashboard?payment=success'</script></html>", media_type="text/html")
+
+    if calculated_hash != posted_hash:
+        logger.error(f"Hash mismatch! Payment potentially tampered. Txn: {txnid}")
+        # In production, you should reject this. handling as failure
+        return Response(content=f"<html><script>window.location.href='{frontend_url}/pricing?payment=failed&reason=security'</script></html>", media_type="text/html")
+    
+    if status != "success":
+        logger.warning(f"Payment failed status: {status} Txn: {txnid}")
+        return Response(content=f"<html><script>window.location.href='{frontend_url}/pricing?payment=failed'</script></html>", media_type="text/html")
+
+    # Processing Fulfillment
+    user_id = udf1
+    pack_id = udf2
+    coupon_code = udf3
+    
+    pack = PACKS.get(pack_id)
+    if not pack or not user_id:
+        logger.error(f"Invalid pack or user in payment callback. Pack: {pack_id}, User: {user_id}")
+        return Response(content=f"<html><script>window.location.href='{frontend_url}/pricing?payment=failed&reason=invalid_data'</script></html>", media_type="text/html")
+
+    # Check if transaction already processed
+    existing_txn = await db.transactions.find_one({"txn_id": txnid})
+    if existing_txn:
+         logger.info(f"Transaction already processed: {txnid}")
+         return Response(content=f"<html><script>window.location.href='{frontend_url}/dashboard?payment=success'</script></html>", media_type="text/html")
+    
+    # Add Credits
+    credits_to_add = pack["credits"]
+    await db.users.update_one({"user_id": user_id}, {"$inc": {"credits": credits_to_add}})
+    
+    # Record Coupon Usage if applicable
+    if coupon_code:
+        await db.discount_codes.update_one(
+            {"code": coupon_code, "is_active": True},
+            {"$inc": {"uses": 1}}
+        )
+
+    # Log Transaction
+    txn_doc = {
+        "txn_id": txnid,
+        "user_id": user_id,
+        "email": email,
+        "amount": float(amount),
+        "status": "success",
+        "pack_id": pack_id,
+        "pack_name": pack["name"],
+        "credits_added": credits_to_add,
+        "coupon_code": coupon_code,
+        "created_at": datetime.now(timezone.utc)
+    }
+    await db.transactions.insert_one(txn_doc)
+    logger.info(f"Payment success processed for user {email}. Added {credits_to_add} credits.")
+    
+    return Response(content=f"<html><script>window.location.href='{frontend_url}/dashboard?payment=success&credits={credits_to_add}'</script></html>", media_type="text/html")
 
 @api_router.post("/payu/failure")
 async def payu_failure(request: Request):

@@ -5,9 +5,11 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { BACKEND_URL } from '../lib/config';
+import { useNavigate } from 'react-router-dom';
 
 export default function Pricing() {
-    const { user, login } = useAuth();
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const [isAnnual, setIsAnnual] = React.useState(true);
     const [couponCode, setCouponCode] = React.useState('');
     const [couponLoading, setCouponLoading] = React.useState(false);
@@ -31,7 +33,7 @@ export default function Pricing() {
 
     const handleSubscribe = async (packId) => {
         if (!user) {
-            login();
+            navigate('/login');
             return;
         }
 

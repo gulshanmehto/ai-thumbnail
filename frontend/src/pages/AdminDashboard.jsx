@@ -357,10 +357,40 @@ export default function AdminDashboard() {
                                                     <p className="text-gray-500 text-sm">{user.email}</p>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span className={`px-2 py-1 rounded text-sm font-medium ${user.credits > 5 ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
-                                                        }`}>
-                                                        {user.credits}
-                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`px-2 py-1 rounded text-sm font-medium ${user.credits > 5 ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
+                                                            }`}>
+                                                            {user.credits}
+                                                        </span>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="h-6 w-6 p-0 rounded-full hover:bg-gray-700 text-gray-400 hover:text-green-400"
+                                                            title="Add Credits"
+                                                            onClick={async () => {
+                                                                const amount = window.prompt(`Add credits for ${user.name}:`, "10");
+                                                                if (amount && !isNaN(amount)) {
+                                                                    try {
+                                                                        await axios.post(`${API_URL}/admin/user/${user.user_id}/add-credits`,
+                                                                            null,
+                                                                            {
+                                                                                params: { credits: parseInt(amount) },
+                                                                                withCredentials: true,
+                                                                                headers: getAuthHeaders()
+                                                                            }
+                                                                        );
+                                                                        toast.success(`Added ${amount} credits to ${user.name}`);
+                                                                        loadUsers(userPage, searchQuery);
+                                                                    } catch (err) {
+                                                                        console.error(err);
+                                                                        toast.error("Failed to add credits");
+                                                                    }
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Plus className="w-3 h-3" />
+                                                        </Button>
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-gray-300">{user.thumbnail_count}</td>
                                                 <td className="px-6 py-4 text-gray-400 text-sm">

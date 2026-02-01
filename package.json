@@ -1,0 +1,14 @@
+{
+    "name": "ai-thumbnail-root",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "start": "concurrently \"npm run server\" \"npm run client\"",
+        "server": "cd backend && python3 -m uvicorn server:app --reload --port 8000",
+        "client": "cd frontend && npm start",
+        "install-all": "cd frontend && npm install && cd ../backend && pip install -r requirements.txt"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}

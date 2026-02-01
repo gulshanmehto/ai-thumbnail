@@ -29,6 +29,26 @@ export default function Dashboard() {
     };
 
     fetchThumbnails();
+
+    // Check for payment success
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      const added = params.get('credits');
+      toast.success(`Payment Successful! ${added ? added + ' credits added.' : 'Credits added to your account.'}`, {
+        duration: 5000,
+        icon: '🎉'
+      });
+      // Clear param
+      window.history.replaceState({}, '', window.location.pathname);
+      // Refresh credits
+      // assuming checkAuth is available from useAuth, but if not we can just reload or ideally useAuth should expose a refresh
+      // For now, let's force a reload of the window after a short delay or just hope useAuth refreshes periodically?
+      // Actually best to reload window or expose refreshUser.
+      // Let's reload to be safe and simple for now as it ensures fresh state
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    }
   }, []);
 
   const getImageUrl = (thumb) => {
