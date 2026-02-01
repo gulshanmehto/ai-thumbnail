@@ -266,72 +266,18 @@ async def generate_thumbnail(req: GenerateRequest, request: Request, user: dict 
         # Reference is optional now (if preset used)
         reference_b64 = await fetch_image_b64(req.reference_image) if req.reference_image else None
 
-        # Build The MASTER PROMPT
-        
-        # 1. Resolve Style Instruction
-        style_instruction = ""
-        if req.style_mode == "preset" and req.style_preset in STYLE_PRESETS:
-             style_instruction = f"Match this style: {STYLE_PRESETS[req.style_preset]}"
-        elif reference_b64:
-             style_instruction = "Match the visual style, lighting, colors, composition and mood of the provided Style Reference image."
-        else:
-             style_instruction = "Professional YouTube thumbnail style, high quality."
-
-        # 2. Resolve Expression
-        expression_instruction = EXPRESSION_PROMPTS.get(req.expression_level, EXPRESSION_PROMPTS["medium"])
-        if req.image_type == "faceless":
-            expression_instruction = "No human face visible. Focus on the object or concept."
-
-        # 3. Resolve Intent
-        intent_instruction = INTENT_PROMPTS.get(req.intent, INTENT_PROMPTS["viral"])
-
-        # 4. Dimensions
-        dimensions = "1280x720 (16:9 landscape)"
-        if req.aspect_ratio == "9:16": dimensions = "720x1280 (9:16 portrait/vertical)"
-        elif req.aspect_ratio == "1:1": dimensions = "1024x1024 (1:1 square)"
-
+        # Build Prompt (Simplified Workflow)
         generation_prompt = f"""
-You are a professional YouTube thumbnail designer.
+Create a high-quality YouTube thumbnail.
 
-TASK:
-Create a high click-through-rate YouTube thumbnail.
+Task:
+1. Use the SUBJECT from the first image provided. Keep their likeness/appearance.
+2. Use the STYLE and COMPOSITION from the second image provided (Reference).
+3. The thumbnail aspect ratio must be {req.aspect_ratio}.
+4. The overall scene description is: "{req.description}".
+5. IMPORTANT: You MUST BAKE the following text into the image clearly and professionally: "{req.thumbnail_text}".
 
-SUBJECT INSTRUCTIONS:
-- Use the first provided image as the Main Subject.
-- Preserve identity, skin tone, and clothing texture.
-- Crop: {req.crop_type.upper()} framing.
-- Expression: {expression_instruction}
-- { "Make sure the face is highly visible and lit." if req.image_type == "face" else "Do not show a face." }
-
-COMPOSITION & INTENT:
-- Intent: {req.intent.upper()} - {intent_instruction}
-- Subject slightly off-center to Rule of Thirds.
-- Leave specific empty space ("copy space") for the text to be laid out without covering the subject.
-- Cinematic angle, dynamic depth.
-
-STYLE & LIGHTING:
-- {style_instruction}
-- High contrast, professional color grading.
-- Sharp focus on subject, background slightly blurred or darkened to separation.
-
-TEXT TO INCLUDE:
-- Text content: "{req.thumbnail_text}"
-- Typography: Bold, "YouTuber" sans-serif font, readable on mobile.
-- Color: High contrast against background (e.g., White with black stroke, or Yellow).
-- Placement: Valid negative space, NO OVERLAP with the subject's face.
-
-QUALITY RULES:
-- Ultra sharp, 4k quality
-- No blur, no noise, no artifacts
-- Perfect hands and eyes (if visible)
-
-NEGATIVE PROMPT AVOID:
-- Extra faces, extra fingers, deformed eyes, distorted skin
-- Watermarks, logos, random objects
-- Blurry output, low resolution, cartoonish faces (unless requested)
-- Text distortion, crooked eyes, melted skin
-
-Generate the thumbnail image now.
+Make it eye-catching, high contrast, and professional.
 """
 
         # Initialize client

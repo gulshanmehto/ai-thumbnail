@@ -24,17 +24,10 @@ const STYLE_PRESETS = [
 export default function Editor() {
     const { user, setUser } = useAuth();
 
-    // Core Inputs
+    // Workflow State: Simple & Direct
+    const [description, setDescription] = useState('');
     const [thumbnailText, setThumbnailText] = useState('');
     const [aspectRatio, setAspectRatio] = useState('16:9');
-
-    // Advanced Prompt Engine Inputs
-    const [intent, setIntent] = useState('viral');
-    const [imageType, setImageType] = useState('face');
-    const [cropType, setCropType] = useState('close-up');
-    const [styleMode, setStyleMode] = useState('preset'); // 'upload' or 'preset'
-    const [stylePreset, setStylePreset] = useState(STYLE_PRESETS[0].id);
-    const [expressionLevel, setExpressionLevel] = useState('medium');
 
     // Images
     const [subjectImage, setSubjectImage] = useState(null);
@@ -59,12 +52,8 @@ export default function Editor() {
     };
 
     const handleGenerate = async () => {
-        if (!subjectImage) {
-            toast.error("Please upload a Subject Image");
-            return;
-        }
-        if (styleMode === 'upload' && !referenceImage) {
-            toast.error("Please upload a Style Reference");
+        if (!subjectImage || !referenceImage || !description) {
+            toast.error("Please provide Subject, Style Reference, and Description.");
             return;
         }
         if (user.credits <= 0) {
@@ -75,18 +64,17 @@ export default function Editor() {
         setLoading(true);
         try {
             const payload = {
-                description: intent, // Use intent as description since we removed the text field
+                description: description,
                 thumbnail_text: thumbnailText,
                 aspect_ratio: aspectRatio,
                 subject_image: subjectPreview,
-                reference_image: (styleMode === 'upload' && referencePreview) ? referencePreview : "",
-                // New Engine Fields
-                intent,
-                image_type: imageType,
-                crop_type: cropType,
-                style_mode: styleMode,
-                style_preset: styleMode === 'preset' ? stylePreset : null,
-                expression_level: expressionLevel
+                reference_image: referencePreview,
+                // Defaults for backend compat
+                intent: 'custom',
+                style_mode: 'upload',
+                image_type: 'face',
+                crop_type: 'close-up',
+                expression_level: 'medium'
             };
 
             const { data } = await axios.post(
@@ -128,155 +116,84 @@ export default function Editor() {
                         AI Designer
                     </h2>
 
-                    <div className="space-y-8">
-                        {/* 1. INTENT (Mandatory) */}
-                        <div className="space-y-3">
-                            <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                                <Zap className="w-4 h-4 text-amber-500" /> 1. Thumbnail Intent
-                            </Label>
-                            <Select value={intent} onValueChange={setIntent}>
-                                <SelectTrigger className="w-full h-11 border-slate-200 bg-slate-50/50">
-                                    <SelectValue placeholder="Select outcome" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="viral">🔥 Viral / Clickbait (High CTR)</SelectItem>
-                                    <SelectItem value="emotional">🥺 Emotional / Dramatic</SelectItem>
-                                    <SelectItem value="educational">📚 Educational / Clean</SelectItem>
-                                    <SelectItem value="podcast">🎙️ Podcast / Interview</SelectItem>
-                                    <SelectItem value="faceless">🎭 Faceless / Mystery</SelectItem>
-                                    <SelectItem value="brand">🏢 Brand Professional</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {/* 2. SUBJECT */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                                    <User className="w-4 h-4 text-blue-500" /> 2. Subject
-                                </Label>
-                                <div className="flex gap-2 text-xs">
-                                    <button
-                                        onClick={() => setImageType('face')}
-                                        className={`px-2 py-1 rounded transition-colors ${imageType === 'face' ? 'bg-blue-100 text-blue-700 font-medium' : 'text-slate-500 hover:bg-slate-100'}`}
-                                    >
-                                        Face
-                                    </button>
-                                    <button
-                                        onClick={() => setImageType('faceless')}
-                                        className={`px-2 py-1 rounded transition-colors ${imageType === 'faceless' ? 'bg-blue-100 text-blue-700 font-medium' : 'text-slate-500 hover:bg-slate-100'}`}
-                                    >
-                                        Faceless
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div
-                                className="border-2 border-dashed border-slate-200 rounded-xl p-4 h-32 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 hover:border-blue-400 transition-all relative overflow-hidden group"
-                                onClick={() => document.getElementById('subject-upload').click()}
-                            >
-                                {subjectPreview ? (
-                                    <>
-                                        <img src={subjectPreview} alt="Subject" className="w-full h-full object-cover rounded-lg" />
-                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                                            <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100">Change Image</span>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="bg-blue-50 p-2 rounded-full mb-2">
-                                            <Upload className="w-5 h-5 text-blue-600" />
-                                        </div>
-                                        <span className="text-xs font-medium text-slate-500">Upload Person/Object</span>
-                                    </>
-                                )}
-                                <input id="subject-upload" type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, setSubjectImage, setSubjectPreview)} />
-                            </div>
-
-                            {imageType === 'face' && (
-                                <div className="space-y-3 pt-1">
-                                    <div className="flex justify-between items-center text-xs text-slate-600">
-                                        <span className="font-medium">Expression Intensity: {expressionLevel}</span>
-                                    </div>
-                                    <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
-                                        {['subtle', 'medium', 'extreme'].map((level) => (
-                                            <button
-                                                key={level}
-                                                onClick={() => setExpressionLevel(level)}
-                                                className={`flex-1 py-1.5 text-xs font-medium rounded-md capitalize transition-all ${expressionLevel === level ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
-                                            >
-                                                {level}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* 3. STYLE */}
-                        <div className="space-y-3">
-                            <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                                <Palette className="w-4 h-4 text-purple-500" /> 3. Style Reference
-                            </Label>
-
-                            <div className="flex bg-slate-100 p-1 rounded-lg mb-3">
-                                <button
-                                    onClick={() => setStyleMode('preset')}
-                                    className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${styleMode === 'preset' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}
-                                >
-                                    Use Preset
-                                </button>
-                                <button
-                                    onClick={() => setStyleMode('upload')}
-                                    className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${styleMode === 'upload' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}
-                                >
-                                    Upload Reference
-                                </button>
-                            </div>
-
-                            {styleMode === 'preset' ? (
-                                <div className="grid grid-cols-2 gap-2">
-                                    {STYLE_PRESETS.map((preset) => (
-                                        <button
-                                            key={preset.id}
-                                            onClick={() => setStylePreset(preset.id)}
-                                            className={`p-3 rounded-lg border text-left text-xs font-medium transition-all ${stylePreset === preset.id ? `ring-2 ring-offset-1 ring-purple-500 ${preset.color}` : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'}`}
-                                        >
-                                            {preset.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            ) : (
+                    <div className="space-y-6">
+                        {/* 1. Images Section */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold text-slate-700">1. Subject Image</Label>
                                 <div
-                                    className="border-2 border-dashed border-slate-200 rounded-xl p-4 h-24 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-all relative overflow-hidden"
+                                    className="border-2 border-dashed border-slate-200 rounded-xl p-2 h-32 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-all relative overflow-hidden"
+                                    onClick={() => document.getElementById('subject-upload').click()}
+                                >
+                                    {subjectPreview ? (
+                                        <img src={subjectPreview} alt="Subject" className="w-full h-full object-cover rounded-lg" />
+                                    ) : (
+                                        <>
+                                            <Upload className="w-5 h-5 text-slate-400 mb-2" />
+                                            <span className="text-[10px] text-slate-400 text-center">Upload Subject</span>
+                                        </>
+                                    )}
+                                    <input id="subject-upload" type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, setSubjectImage, setSubjectPreview)} />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold text-slate-700">2. Style Reference</Label>
+                                <div
+                                    className="border-2 border-dashed border-slate-200 rounded-xl p-2 h-32 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-all relative overflow-hidden"
                                     onClick={() => document.getElementById('ref-upload').click()}
                                 >
                                     {referencePreview ? (
-                                        <img src={referencePreview} alt="Ref" className="w-full h-full object-cover rounded-lg" />
+                                        <img src={referencePreview} alt="Reference" className="w-full h-full object-cover rounded-lg" />
                                     ) : (
-                                        <div className="flex items-center gap-2 text-slate-400">
-                                            <ImageIcon className="w-5 h-5" />
-                                            <span className="text-xs">Upload Style</span>
-                                        </div>
+                                        <>
+                                            <ImageIcon className="w-5 h-5 text-slate-400 mb-2" />
+                                            <span className="text-[10px] text-slate-400 text-center">Upload Style</span>
+                                        </>
                                     )}
                                     <input id="ref-upload" type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, setReferenceImage, setReferencePreview)} />
                                 </div>
-                            )}
-                        </div>
-
-                        {/* 4. DETAILS */}
-                        <div className="space-y-4 pt-2 border-t border-slate-100">
-                            <div className="space-y-2">
-                                <Label className="text-sm font-semibold text-slate-700">Text Overlay</Label>
-                                <Input
-                                    placeholder="e.g. I SURVIVED!"
-                                    value={thumbnailText}
-                                    onChange={(e) => setThumbnailText(e.target.value)}
-                                    className="bg-slate-50 border-slate-200"
-                                />
                             </div>
                         </div>
 
+                        {/* 2. Text Controls */}
+                        <div className="space-y-3">
+                            <Label htmlFor="desc" className="text-sm font-semibold text-slate-700">3. Description / Concept</Label>
+                            <Textarea
+                                id="desc"
+                                placeholder="e.g. A shocked face holding a stack of money in a futuristic city"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                className="h-24 resize-none bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                            />
+                        </div>
+
+                        <div className="space-y-3">
+                            <Label htmlFor="thumb-text" className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                                <Type className="w-4 h-4" /> Text Overlay (Baked into Image)
+                            </Label>
+                            <Input
+                                id="thumb-text"
+                                placeholder="e.g. I MADE $1M!"
+                                value={thumbnailText}
+                                onChange={(e) => setThumbnailText(e.target.value)}
+                                className="bg-slate-50 border-slate-200"
+                            />
+                        </div>
+
+                        <div className="space-y-3">
+                            <Label className="text-sm font-semibold text-slate-700">Aspect Ratio</Label>
+                            <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                                <SelectTrigger className="bg-slate-50 border-slate-200">
+                                    <SelectValue placeholder="Select ratio" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="16:9">YouTube (16:9)</SelectItem>
+                                    <SelectItem value="9:16">Shorts / Reels (9:16)</SelectItem>
+                                    <SelectItem value="1:1">Square (1:1)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                 </div>
 
