@@ -417,6 +417,9 @@ Generate the thumbnail image now.
 
 
 # --- PAYU PAYMENTS ---
+class CheckoutRequest(BaseModel):
+    pack_id: str
+
 # Define pricing packs
 PACKS = {
     "pack_starter": {"amount": 999, "credits": 50, "name": "Starter Plan (50 Credits)"},
